@@ -1,0 +1,28 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "start_color",
+      "value": "#FF4E50"
+    },
+    {
+      "name": "end_color",
+      "value": "#F9D423"
+    },
+    {
+      "name": "start_button",
+      "value": "#FF007AFF"
+    },
+    {
+      "name": "pause_button",
+      "value": "#FFFFC300"
+    },
+    {
+      "name": "reset_button",
+      "value": "#FF8E8E93"
+    }
+  ]
+}
