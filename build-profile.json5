@@ -1,12 +1,11 @@
 {
   "app": {
-    "signingConfigs": [],
     "products": [
       {
         "name": "default",
         "signingConfig": "default",
         "targetSdkVersion": "6.0.0(20)",
-        "compatibleSdkVersion": "6.0.0(20)",
+        "compatibleSdkVersion": "5.0.5(17)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
@@ -18,10 +17,38 @@
     ],
     "buildModeSet": [
       {
-        "name": "debug",
+        "name": "debug"
       },
       {
         "name": "release"
+      }
+    ],
+    "signingConfigs": [
+      {
+        "name": "selfrelease",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "/Users/xunuosi/Code/MySelf/hm-self-key",
+          "storePassword": "0000001C63F09622291AACA9D33DCADB024FAA2A8315D5DB9DD27465D71CA03BB8FF9DB56820D165F418DA17",
+          "keyAlias": "hm-self-key",
+          "keyPassword": "0000001C36A216F65AE6BD3BCBD0BBAEACCE9906AC51FC4330D82734F9494B53A9CACC659D760D9DF2836D98",
+          "signAlg": "SHA256withECDSA",
+          "profile": "/Users/xunuosi/Code/MySelf/hm-self-cert",
+          "certpath": "/Users/xunuosi/Code/MySelf/hm-self-cert"
+        }
+      },
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/xunuosi/.ohos/config/default_PomodoroClock_EKrI5buoulvczslLyFP4YFnW7LF5--tJt8CWpw8Wy4c=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001ACEC0A43C9B6E7978618DE643BB4120351311FDF3DFCED4CE4C57DC81952D1EC28E682F590E6F",
+          "profile": "/Users/xunuosi/.ohos/config/default_PomodoroClock_EKrI5buoulvczslLyFP4YFnW7LF5--tJt8CWpw8Wy4c=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/xunuosi/.ohos/config/default_PomodoroClock_EKrI5buoulvczslLyFP4YFnW7LF5--tJt8CWpw8Wy4c=.p12",
+          "storePassword": "0000001AA09FA57BA8A7F8F6DC7B3DC7B3D7BE4039FD96B7CEFE7F81C4652A41D7841A591425D7C280CD"
+        }
       }
     ]
   },

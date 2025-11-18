@@ -17,8 +17,8 @@
         "description": "$string:EntryAbility_desc",
         "icon": "$media:layered_image",
         "label": "$string:EntryAbility_label",
-        "startWindowIcon": "$media:startIcon",
-        "startWindowBackground": "$color:start_window_background",
+        "startWindowIcon": "$media:pomodoro",
+        "startWindowBackground": "$color:pomodoro_red", // 纯红色背景
         "exported": true,
         "skills": [
           {

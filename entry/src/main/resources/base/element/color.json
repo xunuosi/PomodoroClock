@@ -23,6 +23,14 @@
     {
       "name": "reset_button",
       "value": "#FF8E8E93"
+    },
+    {
+      "name": "pomodoro_red",
+      "value": "#FF4E50"
+    },
+    {
+      "name": "white",
+      "value": "#FFFFFF"
     }
   ]
 }
