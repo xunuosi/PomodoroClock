@@ -3,7 +3,7 @@
     "products": [
       {
         "name": "default",
-        "signingConfig": "default",
+        "signingConfig": "defaultwin",
         "targetSdkVersion": "6.0.0(20)",
         "compatibleSdkVersion": "5.0.5(17)",
         "runtimeOS": "HarmonyOS",
@@ -48,6 +48,19 @@
           "signAlg": "SHA256withECDSA",
           "storeFile": "/Users/xunuosi/.ohos/config/default_PomodoroClock_EKrI5buoulvczslLyFP4YFnW7LF5--tJt8CWpw8Wy4c=.p12",
           "storePassword": "0000001AA09FA57BA8A7F8F6DC7B3DC7B3D7BE4039FD96B7CEFE7F81C4652A41D7841A591425D7C280CD"
+        }
+      },
+      {
+        "name": "defaultwin",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\xunuosi\\.ohos\\config\\defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BCF3C847A98F068D90C43892C9E19E54760436F0DF7F6E85CF483C52207EAD26B5B3AC73EFB2DE7",
+          "profile": "C:\\Users\\xunuosi\\.ohos\\config\\defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\xunuosi\\.ohos\\config\\defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p12",
+          "storePassword": "0000001B02D78530DFED5E44DA986047F5116ADD4FA36163A98178A75A1C8A6233A056F6B5EB3B729B1A28"
         }
       }
     ]

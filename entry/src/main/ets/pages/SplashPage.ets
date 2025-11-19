@@ -9,7 +9,7 @@ struct SplashPage {
     setTimeout(() => {
       // 跳转到主页 (Index)
       router.replaceUrl({ url: 'pages/Index' });
-    }, 12000); // 2秒后跳转
+    }, 2000); // 2秒后跳转
   }
 
   build() {
