@@ -1,76 +1,56 @@
-// src/main/ets/pages/SplashPage.ets
 import router from '@ohos.router';
 
+@Preview
 @Entry
 @Component
 struct SplashPage {
-  // 页面显示后，延迟跳转到主页
+  // 页面加载时执行
   aboutToAppear() {
+    // 模拟加载耗时，2秒后跳转到主页
     setTimeout(() => {
-      // 跳转到主页 (Index)
-      router.replaceUrl({ url: 'pages/Index' });
-    }, 2000); // 2秒后跳转
+      router.replaceUrl({ url: 'pages/Index' }); // 替换为你实际的主页路径
+    }, 2000);
   }
 
   build() {
-    Stack({ alignContent: Alignment.Top }) {
-      // -------------------------------------------
-      // 1. 背景层：红色到白色的线性渐变
-      // -------------------------------------------
-      Column()
-        .width('100%')
-        .height('100%')
-        .linearGradient({
-          angle: 180, // 从上到下
-          colors: [
-            ['#FF4E50', 0.0], // 顶部：番茄红
-            ['#FF4E50', 0.4], // 中间保持一段红色
-            ['#FFFFFF', 1.0]  // 底部：白色
-          ]
-        })
+    Column() {
+      // 使用 Blank 组件来占据空间，实现上下布局的弹性分配
+      // 这里放一个 Blank，把中间的内容往下顶一点，或者让上下平分
+      Blank()
 
-      // -------------------------------------------
-      // 2. 内容层
-      // -------------------------------------------
-      Column() {
-        // A. LOGO 部分 (根据图片，位于中上方)
-        Image($r('app.media.pomodoro')) // 请确保你有这个图标
+      // --- 中间核心内容 (Logo + 文字) ---
+      Column({ space: 10 }) {
+        // Logo 图片
+        Image($r('app.media.tomatodo_logo'))
           .width(120)
           .height(120)
           .objectFit(ImageFit.Contain)
-          .margin({ top: '25%' }) // 距离顶部位置
+          .margin({ bottom: 10 })
 
-        // B. Slogan 文字
-        Text('专注每一刻，前行每一天') // 假设这是设计图上的文字
-          .fontSize(20)
-          .fontColor(Color.White)
-          .fontWeight(FontWeight.Medium)
-          .letterSpacing(2) // 字间距
-          .margin({ top: 20 })
-          .opacity(0.9)
+        // 主标题 Tomatodo
+        Text('Tomatodo')
+          .fontSize(36)
+          .fontWeight(FontWeight.Bold)
+          .fontColor('#2B333E') // 深色字体
 
-        // C. 撑开空间，让底部图形沉底
-        Blank()
-
-        // D. 底部图形 (模拟设计图底部的半圆/图表)
-        // 这里用一个简单的圆形示意，实际开发可用 Image 替换
-        Stack({ alignContent: Alignment.Center }) {
-          // 红色半圆部分示意
-          Circle({ width: 200, height: 200 })
-            .fill('#D93025') // 深一点的红色
-            .opacity(0.8)
-
-          Text('25日') // 模拟图中的文字
-            .fontColor(Color.White)
-            .fontSize(16)
-        }
-        .margin({ bottom: 50 }) // 距离底部距离
-
+        // 副标题 Master your time
+        Text('Master your time')
+          .fontSize(16)
+          .fontColor('#989A9C') // 灰色字体
+          .letterSpacing(0.5) // 稍微增加一点字间距
       }
-      .width('100%')
-      .height('100%')
+
+      Blank() // 下方的 Blank，将 Loading 组件推到底部
+
+      // --- 底部加载圈 ---
+      LoadingProgress()
+        .color('#F08080') // 设置加载圈颜色与 Logo 一致
+        .width(40)
+        .height(40)
+        .margin({ bottom: 60 }) // 距离底部留出一些空间
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#FFFFFF') // 背景纯白
   }
 }

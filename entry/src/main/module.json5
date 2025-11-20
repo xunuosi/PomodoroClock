@@ -15,10 +15,10 @@
         "name": "EntryAbility",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
         "description": "$string:EntryAbility_desc",
-        "icon": "$media:layered_image",
+        "icon": "$media:icon_1024",
         "label": "$string:EntryAbility_label",
-        "startWindowIcon": "$media:pomodoro",
-        "startWindowBackground": "$color:pomodoro_red", // 纯红色背景
+        "startWindowIcon": "$media:tomatodo_logo",
+        "startWindowBackground": "$color:start_window_background", // 纯红色背景
         "exported": true,
         "skills": [
           {
