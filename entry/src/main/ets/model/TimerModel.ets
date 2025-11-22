@@ -80,40 +80,49 @@ export class TimerStore {
   // 初始化并加载数据 (需要在 UIAbility 或 Page 的 aboutToAppear 中调用)
   async initData(context: common.Context) {
     try {
-      // 1. 获取首选项实例
+      // 获取实例
       this.pref = await preferences.getPreferences(context, 'PomodoroStore');
 
-      // 2. 加载任务列表
-      const tasksJson = await this.pref.get('taskList', '[]') as string;
-      const loadedTasks = JSON.parse(tasksJson) as TaskItem[];
-      // 重新映射为 TaskItem 实例以确保 @ObservedV2 生效 (如果是纯对象数组可能失去响应性，最好重新 new)
-      // 但在 V2 中，只要数组替换，且元素结构一致通常没问题。为了稳妥：
-      this.taskList = loadedTasks.map(t => {
-        let item = new TaskItem(t.content);
-        item.id = t.id;
-        item.isCompleted = t.isCompleted;
-        return item;
-      });
-
-      // 3. 加载设置
+      // 1. 加载设置
       const settingsJson = await this.pref.get('settings', '') as string;
-      if (settingsJson) {
-        const savedSettings = JSON.parse(settingsJson) as SettingsModel;
-        // 逐个赋值以保持响应性
-        this.settings.focusDuration = savedSettings.focusDuration;
-        this.settings.shortBreakDuration = savedSettings.shortBreakDuration;
-        this.settings.longBreakDuration = savedSettings.longBreakDuration;
-        this.settings.autoStartBreaks = savedSettings.autoStartBreaks;
-        this.settings.autoStartFocus = savedSettings.autoStartFocus;
-        this.settings.longBreakInterval = savedSettings.longBreakInterval;
-        this.settings.notificationEnabled = savedSettings.notificationEnabled;
+      if (settingsJson && settingsJson.length > 0) {
+        // ✅ 使用 try-catch 包裹解析过程，防止烂数据导致崩溃
+        try {
+          const saved = JSON.parse(settingsJson) as SettingsDTO;
+          // ✅ 逐个赋值，并提供兜底默认值
+          this.settings.focusDuration = saved.focusDuration ?? 25;
+          this.settings.shortBreakDuration = saved.shortBreakDuration ?? 5;
+          this.settings.longBreakDuration = saved.longBreakDuration ?? 15;
+          this.settings.autoStartBreaks = saved.autoStartBreaks ?? false;
+          this.settings.autoStartFocus = saved.autoStartFocus ?? false;
+          this.settings.longBreakInterval = saved.longBreakInterval ?? 4;
+          this.settings.notificationEnabled = saved.notificationEnabled ?? true;
+        } catch (e) {
+          console.error('Error parsing settings JSON:', e);
+        }
       }
 
-      // 4. 初始化时间 (如果之前保存了状态，也可以恢复，这里暂时重置为配置时长)
+      // 2. 加载任务
+      const tasksJson = await this.pref.get('taskList', '[]') as string;
+      if (tasksJson) {
+        try {
+          const loadedTasks = JSON.parse(tasksJson) as TaskDTO[];
+          this.taskList = loadedTasks.map(t => {
+            let item = new TaskItem(t.content);
+            item.id = t.id;
+            item.isCompleted = t.isCompleted;
+            return item;
+          });
+        } catch (e) {
+          console.error('Error parsing tasks JSON:', e);
+        }
+      }
+
+      // ✅ 数据加载完成后，立即重置计时器以应用最新配置
       this.resetTimer();
 
     } catch (err) {
-      console.error('Failed to load data:', JSON.stringify(err));
+      console.error('Failed to init preferences:', JSON.stringify(err));
     }
   }
 
@@ -121,19 +130,7 @@ export class TimerStore {
   saveData() {
     if (!this.pref) return;
     try {
-      // ✅ 修复：显式指定映射后的类型为 TaskDTO[]
-      const plainTasks: TaskDTO[] = this.taskList.map((task) => {
-        // 显式声明对象字面量的类型
-        const item: TaskDTO = {
-          id: task.id,
-          content: task.content,
-          isCompleted: task.isCompleted
-        };
-        return item;
-      });
-      const tasksJson = JSON.stringify(plainTasks);
-
-      // ✅ 修复：显式指定类型为 SettingsDTO
+      // 1. 序列化设置
       const plainSettings: SettingsDTO = {
         focusDuration: this.settings.focusDuration,
         shortBreakDuration: this.settings.shortBreakDuration,
@@ -145,10 +142,21 @@ export class TimerStore {
       };
       const settingsJson = JSON.stringify(plainSettings);
 
-      // 写入首选项
-      this.pref.put('taskList', tasksJson);
+      // 2. 序列化任务
+      const plainTasks: TaskDTO[] = this.taskList.map((task) => {
+        let item = new TaskDTO();
+        item.id = task.id;
+        item.content = task.content;
+        item.isCompleted = task.isCompleted;
+        return item;
+      });
+      const tasksJson = JSON.stringify(plainTasks);
+
+      // 3. 写入并刷盘
       this.pref.put('settings', settingsJson);
-      this.pref.flush(); // 刷盘
+      this.pref.put('taskList', tasksJson);
+      this.pref.flush(); // 确保写入磁盘
+
     } catch (err) {
       console.error('Failed to save data:', JSON.stringify(err));
     }
@@ -241,7 +249,7 @@ export class TimerStore {
   resetTimer() {
     this.stopTimer();
     this.isRunning = false;
-    this.timeLeft = this.totalTime;
+    this.switchMode(this.currentMode);
   }
 
   addTask(taskName: string) {

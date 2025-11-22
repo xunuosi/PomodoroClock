@@ -174,17 +174,18 @@ export struct SettingsView {
             .onClick(() => {
               this.store.settings.copyFrom(this.draftSettings);
               this.store.saveData();
+              this.store.resetTimer();
+
               const nav = this.queryNavigationInfo();
               nav?.pathStack.pop();
             })
         }
         .width('100%')
-        .padding({ left: 20, right: 20, top: 15, bottom: 15 })
+        .padding({ left: 20, right: 20, top: 15, bottom: 0 })
 
         // --- 内容滚动区 ---
         Scroll() {
           Column({ space: 20 }) {
-
             // ✅ 第一组：计时器配置
             Column() {
               this.GroupTitle($r('app.string.settings_timer_config'))
