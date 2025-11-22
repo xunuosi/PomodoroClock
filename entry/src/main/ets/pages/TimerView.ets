@@ -1,4 +1,4 @@
-import { TimerStore, TimerMode } from '../model/TimerModel';
+import { TimerStore, TimerMode, TaskItem } from '../model/TimerModel';
 import { window } from '@kit.ArkUI';
 
 @Preview
@@ -246,7 +246,7 @@ export struct TimerView {
           .fontColor('#989A9C')
           .letterSpacing(1)
         Blank()
-        Text($r('app.string.sessions_count', this.store.taskList.length))
+        Text($r('app.string.sessions_count', this.store.completedTaskCount))
           .fontSize(12)
           .fontColor('#989A9C')
           .backgroundColor('#F0F0F0')
@@ -258,9 +258,10 @@ export struct TimerView {
 
       Row({ space: 12 }) {
         TextInput({ placeholder: $r('app.string.app_add_task_hint'), text: this.newTaskName })
+          .placeholderColor($r('app.color.text_hint'))
           .layoutWeight(1)
           .height(48)
-          .backgroundColor('#F7F8FA')
+          .backgroundColor('#F8FAFC')
           .borderRadius(12)
           .onChange((value: string) => {
             this.newTaskName = value;
@@ -279,7 +280,8 @@ export struct TimerView {
         .borderRadius(12)
         .width(48)
         .height(48)
-        .backgroundColor('#989A9C')
+        .backgroundColor(this.newTaskName.trim().length > 0 ? '#0f172a' : '#989A9C')
+        .animation({ duration: 200 })
         .onClick(() => {
           this.store.addTask(this.newTaskName);
           this.newTaskName = '';
@@ -302,22 +304,68 @@ export struct TimerView {
         .alignItems(HorizontalAlign.Center)
         .margin({ top: 20 })
       } else {
-        List({ space: 10 }) {
-          // V2 中 ForEach 依然可用，Repeat 是更优选择，但 ForEach 足够稳定
-          ForEach(this.store.taskList, (task: string, index: number) => {
-            ListItem() {
+        Column({ space: 10 }) {
+          // 遍历 TaskItem 对象
+          ForEach(this.store.taskList, (task: TaskItem, index: number) => {
+            Row() {
+              // 1. 左侧勾选按钮 (点击切换状态)
               Row() {
-                Circle().width(16).height(16).stroke($r('app.color.app_primary_red_500')).strokeWidth(2).fill(Color.Transparent).margin({ right: 10 })
-                Text(task).fontSize(16).fontColor(this.ColorDark)
+                if (task.isCompleted) {
+                  // ✅ 完成状态：显示绿色对勾圆环
+                  // 使用 SymbolGlyph 的 checkmark.circle
+                  SymbolGlyph($r('sys.symbol.checkmark_circle'))
+                    .fontSize(24)
+                    .fontColor([$r('app.color.green_500')]) // 绿色
+                } else {
+                  // ✅ 未完成状态：显示绿色描边圆圈
+                  Circle()
+                    .width(20)
+                    .height(20)
+                    .stroke($r('app.color.green_500')) // 绿色描边
+                    .strokeWidth(2)
+                    .fill(Color.Transparent)
+                    .margin({ left: 2, right: 2 }) // 微调位置以对齐 Symbol
+                }
               }
-              .width('100%')
-              .padding(12)
-              .backgroundColor('#F9F9F9')
-              .borderRadius(8)
+              .width(30) // 固定触控区域宽度
+              .justifyContent(FlexAlign.Start)
+              .onClick(() => {
+                // 触发 V2 状态更新
+                this.store.toggleTask(task);
+              })
+
+              // 2. 中间任务文本
+              Text(task.content)
+                .fontSize(16)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(task.isCompleted ? $r('app.color.989A9C') : this.ColorDark) // 完成变灰
+                .decoration({
+                  type: task.isCompleted ? TextDecorationType.LineThrough : TextDecorationType.None,
+                  color: $r('app.color.989A9C')
+                }) // 完成加删除线 (如果不想要删除线，可去掉此属性)
+                .layoutWeight(1)
+                .margin({ left: 8 })
+
+              // 3. 右侧删除按钮 (垃圾桶)
+              Button({ type: ButtonType.Circle }) {
+                SymbolGlyph($r('sys.symbol.trash'))
+                  .fontSize(18)
+                  .fontColor(['#CFD1D4']) // 浅灰色图标
+              }
+              .width(32)
+              .height(32)
+              .backgroundColor(Color.Transparent) // 透明背景
+              .onClick(() => {
+                // 触发删除逻辑
+                this.store.deleteTask(task);
+              })
             }
+            .width('100%')
+            .padding(12)
+            .backgroundColor('#F9F9F9')
+            .borderRadius(12)
           })
         }
-        .height(150)
       }
     }
     .width('90%')

@@ -7,6 +7,20 @@ export enum TimerMode {
   Long = 'Long_rest'
 }
 
+// ✅ [新增] 定义任务项类，使用 V2 装饰器确保 UI 能监听到属性变化
+@ObservedV2
+export class TaskItem {
+  id: number;
+  @Trace content: string;
+  @Trace isCompleted: boolean;
+
+  constructor(content: string) {
+    this.id = Date.now() + Math.random(); // 生成唯一ID
+    this.content = content;
+    this.isCompleted = false;
+  }
+}
+
 // 使用 V2 装饰器修饰类，实现深度观测
 @ObservedV2
 export class TimerStore {
@@ -14,7 +28,8 @@ export class TimerStore {
   @Trace timeLeft: number = 25 * 60;
   @Trace totalTime: number = 25 * 60;
   @Trace isRunning: boolean = false;
-  @Trace taskList: string[] = [];
+  // ✅ [修改] 将 string[] 改为 TaskItem[]
+  @Trace taskList: TaskItem[] = [];
 
   private timerId: number = -1;
 
@@ -60,6 +75,11 @@ export class TimerStore {
     }
   }
 
+  get completedTaskCount(): number {
+    // 过滤出 isCompleted 为 true 的任务并计算长度
+    return this.taskList.filter(task => task.isCompleted).length;
+  }
+
   resetTimer() {
     this.stopTimer();
     this.isRunning = false;
@@ -68,8 +88,18 @@ export class TimerStore {
 
   addTask(taskName: string) {
     if (taskName.trim() !== '') {
-      // V2 中直接 push 即可触发 UI 更新
-      this.taskList.push(taskName);
+      this.taskList.push(new TaskItem(taskName));
+    }
+  }
+
+  toggleTask(task: TaskItem) {
+    task.isCompleted = !task.isCompleted;
+  }
+
+  deleteTask(task: TaskItem) {
+    const index = this.taskList.indexOf(task);
+    if (index !== -1) {
+      this.taskList.splice(index, 1);
     }
   }
 

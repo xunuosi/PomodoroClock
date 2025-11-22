@@ -63,6 +63,10 @@
     {
       "name": "long_rest_circle_bg",
       "value": "#d2e1f9"
+    },
+    {
+      "name": "text_hint",
+      "value": "#9ba9bd"
     }
   ]
 }
