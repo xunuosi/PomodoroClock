@@ -1,6 +1,7 @@
 import { TimerStore, TimerMode } from '../model/TimerModel';
 import { window } from '@kit.ArkUI';
 
+@Preview
 @ComponentV2
 export struct TimerView {
   // 接收外部传入的 VM，或者内部实例化
@@ -56,25 +57,31 @@ export struct TimerView {
   build() {
     // NavDestination 是 Navigation 架构下的标准页面容器
     NavDestination() {
-      Column() {
-        // 1. 顶部导航
-        this.HeaderBuilder()
+      Scroll() {
+        Column() {
+          // 1. 顶部导航
+          this.HeaderBuilder()
 
-        // 2. 模式切换
-        this.ModeSwitcherBuilder()
+          // 2. 模式切换
+          this.ModeSwitcherBuilder()
 
-        // 3. 倒计时圆环
-        this.TimerCircleBuilder()
+          // 3. 倒计时圆环
+          this.TimerCircleBuilder()
 
-        // 4. 控制按钮
-        this.ControlsBuilder()
+          // 4. 控制按钮
+          this.ControlsBuilder()
 
-        // 5. 任务列表
-        this.TasksSectionBuilder()
+          // 5. 任务列表
+          this.TasksSectionBuilder()
+        }
+        .width('100%')
+        .backgroundColor(this.ColorBg)
+        .padding({ top: this.topMargin, bottom: 50 }) // 底部留白，防止划到底太贴边
       }
       .width('100%')
       .height('100%')
-      .backgroundColor(this.ColorBg)
+      .scrollBar(BarState.Auto) // 自动显示滚动条
+      .align(Alignment.TopStart)
       // ✅ 关键修复：手动添加顶部 Padding，避开状态栏
       .padding({ top: this.topMargin })
       // API 17+ 使用 expandSafeArea 处理沉浸式，不再需要手动计算 padding
@@ -95,10 +102,11 @@ export struct TimerView {
           .fontColor(this.ColorDark)
       }
       Blank()
-      Image($r('sys.media.ohos_ic_public_edit'))
-        .width(24)
-        .height(24)
-        .fillColor('#989A9C')
+      SymbolGlyph($r('sys.symbol.gearshape'))
+        .fontSize(24)
+        .fontColor([$r('app.color.989A9C')])
+        .fontWeight(FontWeight.Medium)            // 可选：设置粗细
+        .renderingStrategy(SymbolRenderingStrategy.SINGLE) // 可选：单色渲染
     }
     .width('100%')
     .padding({ left: 20, right: 20, top: 10, bottom: 10 })
@@ -168,10 +176,11 @@ export struct TimerView {
   @Builder ControlsBuilder() {
     Row({ space: 20 }) {
       Button({ type: ButtonType.Circle }) {
-        Image($r('sys.media.ohos_ic_public_restore'))
-          .width(24)
-          .height(24)
-          .fillColor(this.ColorDark)
+        SymbolGlyph($r('sys.symbol.arrow_counterclockwise'))
+          .fontSize(24)
+          .fontColor([this.ColorDark])
+          .fontWeight(FontWeight.Medium)
+          .renderingStrategy(SymbolRenderingStrategy.SINGLE)
       }
       .width(56)
       .height(56)
