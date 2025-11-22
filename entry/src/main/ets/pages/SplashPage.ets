@@ -1,56 +1,77 @@
-import router from '@ohos.router';
+import { promptAction } from '@kit.ArkUI';
 
-@Preview
-@Entry
-@Component
-struct SplashPage {
-  // 页面加载时执行
+@ComponentV2
+export struct SplashPage {
+  // --- 生命周期 ---
   aboutToAppear() {
     // 模拟加载耗时，2秒后跳转到主页
     setTimeout(() => {
-      router.replaceUrl({ url: 'pages/Index' }); // 替换为你实际的主页路径
+      this.navigateToHome();
     }, 2000);
   }
 
-  build() {
-    Column() {
-      // 使用 Blank 组件来占据空间，实现上下布局的弹性分配
-      // 这里放一个 Blank，把中间的内容往下顶一点，或者让上下平分
-      Blank()
+  // --- 逻辑方法 ---
+  private navigateToHome() {
+    // [API 17 核心变更]
+    // 不再使用 import router，而是获取上下文中的 Navigation 栈
+    // queryNavigationInfo() 是组件内部获取自身所属 NavigationInfo 的标准 API
+    const navInfo = this.queryNavigationInfo();
 
-      // --- 中间核心内容 (Logo + 文字) ---
-      Column({ space: 10 }) {
-        // Logo 图片
-        Image($r('app.media.tomatodo_logo'))
-          .width(120)
-          .height(120)
-          .objectFit(ImageFit.Contain)
-          .margin({ bottom: 10 })
-
-        // 主标题 Tomatodo
-        Text('Tomatodo')
-          .fontSize(36)
-          .fontWeight(FontWeight.Bold)
-          .fontColor('#2B333E') // 深色字体
-
-        // 副标题 Master your time
-        Text('Master your time')
-          .fontSize(16)
-          .fontColor('#989A9C') // 灰色字体
-          .letterSpacing(0.5) // 稍微增加一点字间距
-      }
-
-      Blank() // 下方的 Blank，将 Loading 组件推到底部
-
-      // --- 底部加载圈 ---
-      LoadingProgress()
-        .color('#F08080') // 设置加载圈颜色与 Logo 一致
-        .width(40)
-        .height(40)
-        .margin({ bottom: 60 }) // 距离底部留出一些空间
+    if (navInfo) {
+      const pathStack = navInfo.pathStack;
+      // 使用 replacePath 销毁当前页（Splash），防止用户按返回键回到启动页
+      pathStack.replacePath({ name: 'Home' });
+    } else {
+      // 异常处理：如果获取不到栈（极少情况），做个兜底提示
+      promptAction.showToast({ message: 'Navigation stack not found' });
     }
-    .width('100%')
-    .height('100%')
-    .backgroundColor('#FFFFFF') // 背景纯白
+  }
+
+  // --- UI 构建 ---
+  build() {
+    // [强制] 所有路由子页面必须由 NavDestination 包裹
+    NavDestination() {
+      Column() {
+        // 使用 Blank 占据上方空间，实现弹性布局
+        Blank()
+
+        // --- 中间核心内容 ---
+        Column({ space: 10 }) {
+          // Logo 图片
+          Image($r('app.media.tomatodo_logo'))
+            .width(120)
+            .height(120)
+            .objectFit(ImageFit.Contain)
+            .margin({ bottom: 10 })
+
+          // 主标题
+          Text('Tomatodo')
+            .fontSize(36)
+            .fontWeight(FontWeight.Bold)
+            .fontColor('#2B333E')
+
+          // 副标题
+          Text('Master your time')
+            .fontSize(16)
+            .fontColor('#989A9C')
+            .letterSpacing(0.5)
+        }
+
+        Blank() // 将 Loading 组件推到底部
+
+        // --- 底部加载圈 ---
+        LoadingProgress()
+          .color('#F08080')
+          .width(40)
+          .height(40)
+          .margin({ bottom: 60 })
+      }
+      .width('100%')
+      .height('100%')
+      .backgroundColor('#FFFFFF')
+      // [沉浸式] 确保背景铺满，内容避让非安全区
+      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+    }
+    .hideTitleBar(true) // 隐藏默认导航栏
   }
 }
