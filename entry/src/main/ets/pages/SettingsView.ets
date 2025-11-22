@@ -1,4 +1,5 @@
-import { TimerStore } from '../model/TimerModel';
+import { TimerStore, SettingsModel } from '../model/TimerModel';
+import { window } from '@kit.ArkUI';
 
 /**
  * 设置卡片容器组件
@@ -32,6 +33,43 @@ struct SettingCard {
 @ComponentV2
 export struct SettingsView {
   @Param store: TimerStore = new TimerStore();
+  @Local draftSettings: SettingsModel = new SettingsModel();
+
+  @Local topMargin: number = 0;
+
+  aboutToAppear(): void {
+    this.draftSettings.copyFrom(this.store.settings);
+
+    window.getLastWindow(this.getUIContext().getHostContext()).then((win) => {
+      // 确保状态栏显示且文字清晰
+      win.setWindowSystemBarProperties({
+        statusBarColor: '#F7F8FA',
+        statusBarContentColor: '#000000',
+        navigationBarContentColor: '#000000'
+      });
+
+      const updateHeight = (area: window.AvoidArea) => {
+        const height = this.getUIContext().px2vp(area.topRect.height);
+        if (height > 0) {
+          this.topMargin = height;
+        }
+      };
+
+      // 初始获取
+      let type = window.AvoidAreaType.TYPE_SYSTEM;
+      try {
+        let avoidArea = win.getWindowAvoidArea(type);
+        updateHeight(avoidArea);
+      } catch (e) {}
+
+      // 监听变化
+      win.on('avoidAreaChange', (data) => {
+        if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
+          updateHeight(data.area);
+        }
+      });
+    });
+  }
 
   build() {
     NavDestination() {
@@ -51,6 +89,11 @@ export struct SettingsView {
             .fontColor($r('app.color.blue_500'))
             .fontWeight(FontWeight.Medium)
             .onClick(() => {
+              this.store.settings.copyFrom(this.draftSettings);
+              // A. 只有点击这里，才真正写入磁盘持久化
+              this.store.saveData();
+
+              // B. 返回上一页
               const nav = this.queryNavigationInfo();
               nav?.pathStack.pop();
             })
@@ -64,45 +107,38 @@ export struct SettingsView {
 
             // 1. 计时器配置
             SettingCard({ title: $r('app.string.settings_timer_config') }) {
-              this.CounterRow($r('app.string.settings_focus_duration'), this.store.settings.focusDuration, (val: number) => {
-                this.store.settings.focusDuration = val;
-                this.store.saveData();
+              this.CounterRow($r('app.string.settings_focus_duration'), this.draftSettings.focusDuration, (val: number) => {
+                this.draftSettings.focusDuration = val; // 修改草稿，立即刷新 UI
               })
               Divider().color($r('app.color.divider'))
-              this.CounterRow($r('app.string.settings_short_break_duration'), this.store.settings.shortBreakDuration, (val: number) => {
-                this.store.settings.shortBreakDuration = val;
-                this.store.saveData();
+              this.CounterRow($r('app.string.settings_short_break_duration'), this.draftSettings.shortBreakDuration, (val: number) => {
+                this.draftSettings.shortBreakDuration = val;
               })
               Divider().color($r('app.color.divider'))
-              this.CounterRow($r('app.string.settings_long_break_duration'), this.store.settings.longBreakDuration, (val: number) => {
-                this.store.settings.longBreakDuration = val;
-                this.store.saveData();
+              this.CounterRow($r('app.string.settings_long_break_duration'), this.draftSettings.longBreakDuration, (val: number) => {
+                this.draftSettings.longBreakDuration = val;
               })
             }
 
             // 2. 自动化配置
             SettingCard({ title: $r('app.string.settings_automation') }) {
-              this.ToggleRow($r('app.string.settings_auto_start_break'), this.store.settings.autoStartBreaks, (val: boolean) => {
-                this.store.settings.autoStartBreaks = val;
-                this.store.saveData();
+              this.ToggleRow($r('app.string.settings_auto_start_break'), this.draftSettings.autoStartBreaks, (val: boolean) => {
+                this.draftSettings.autoStartBreaks = val;
               })
               Divider().color($r('app.color.divider'))
-              this.ToggleRow($r('app.string.settings_auto_start_focus'), this.store.settings.autoStartFocus, (val: boolean) => {
-                this.store.settings.autoStartFocus = val;
-                this.store.saveData();
+              this.ToggleRow($r('app.string.settings_auto_start_focus'), this.draftSettings.autoStartFocus, (val: boolean) => {
+                this.draftSettings.autoStartFocus = val;
               })
               Divider().color($r('app.color.divider'))
-              this.CounterRow($r('app.string.settings_long_break_interval'), this.store.settings.longBreakInterval, (val: number) => {
-                this.store.settings.longBreakInterval = val;
-                this.store.saveData();
+              this.CounterRow($r('app.string.settings_long_break_interval'), this.draftSettings.longBreakInterval, (val: number) => {
+                this.draftSettings.longBreakInterval = val;
               }, $r('app.string.settings_long_break_interval_desc'))
             }
 
             // 3. 通知配置
             SettingCard({ title: $r('app.string.settings_notification') }) {
-              this.ToggleRow($r('app.string.settings_timer_finished_alert'), this.store.settings.notificationEnabled, (val: boolean) => {
-                this.store.settings.notificationEnabled = val;
-                this.store.saveData();
+              this.ToggleRow($r('app.string.settings_timer_finished_alert'), this.draftSettings.notificationEnabled, (val: boolean) => {
+                this.draftSettings.notificationEnabled = val;
               }, $r('app.string.settings_timer_finished_alert_desc'))
             }
             // 底部版本号
@@ -121,6 +157,7 @@ export struct SettingsView {
       .width('100%')
       .height('100%')
       .backgroundColor($r('app.color.app_window_bg'))
+      .padding({ top: this.topMargin })
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
     }
     .hideTitleBar(true)
@@ -158,7 +195,7 @@ export struct SettingsView {
           if (value > 1) onChange(value - 1)
         })
 
-        Text(value.toString())
+        Text((value ?? 0).toString())
           .fontSize(16)
           .fontWeight(FontWeight.Medium)
           .fontColor($r('app.color.text_primary'))
@@ -203,6 +240,8 @@ export struct SettingsView {
 
       Toggle({ type: ToggleType.Switch, isOn: isOn })
         .selectedColor($r('app.color.text_primary')) // 开关开启颜色
+        .width(52)   // 增大宽度 (建议 48-52)
+        .height(32)  // 增大高度 (建议 28-32)
         .onChange((isOn: boolean) => {
           onChange(isOn)
         })

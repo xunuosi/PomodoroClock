@@ -9,6 +9,22 @@ export enum TimerMode {
   Long = 'Long_rest'
 }
 
+class TaskDTO {
+  id: number = 0;
+  content: string = '';
+  isCompleted: boolean = false;
+}
+
+class SettingsDTO {
+  focusDuration: number = 25;
+  shortBreakDuration: number = 5;
+  longBreakDuration: number = 15;
+  autoStartBreaks: boolean = false;
+  autoStartFocus: boolean = false;
+  longBreakInterval: number = 4;
+  notificationEnabled: boolean = true;
+}
+
 @ObservedV2
 export class TaskItem {
   id: number;
@@ -33,6 +49,16 @@ export class SettingsModel {
   @Trace longBreakInterval: number = 4;      // 长休息间隔 (几个番茄后)
 
   @Trace notificationEnabled: boolean = true; // 计时结束提醒
+
+  copyFrom(other: SettingsModel) {
+    this.focusDuration = other.focusDuration;
+    this.shortBreakDuration = other.shortBreakDuration;
+    this.longBreakDuration = other.longBreakDuration;
+    this.autoStartBreaks = other.autoStartBreaks;
+    this.autoStartFocus = other.autoStartFocus;
+    this.longBreakInterval = other.longBreakInterval;
+    this.notificationEnabled = other.notificationEnabled;
+  }
 }
 
 // 使用 V2 装饰器修饰类，实现深度观测
@@ -95,11 +121,31 @@ export class TimerStore {
   saveData() {
     if (!this.pref) return;
     try {
-      // 序列化
-      const tasksJson = JSON.stringify(this.taskList);
-      const settingsJson = JSON.stringify(this.settings);
+      // ✅ 修复：显式指定映射后的类型为 TaskDTO[]
+      const plainTasks: TaskDTO[] = this.taskList.map((task) => {
+        // 显式声明对象字面量的类型
+        const item: TaskDTO = {
+          id: task.id,
+          content: task.content,
+          isCompleted: task.isCompleted
+        };
+        return item;
+      });
+      const tasksJson = JSON.stringify(plainTasks);
 
-      // 写入
+      // ✅ 修复：显式指定类型为 SettingsDTO
+      const plainSettings: SettingsDTO = {
+        focusDuration: this.settings.focusDuration,
+        shortBreakDuration: this.settings.shortBreakDuration,
+        longBreakDuration: this.settings.longBreakDuration,
+        autoStartBreaks: this.settings.autoStartBreaks,
+        autoStartFocus: this.settings.autoStartFocus,
+        longBreakInterval: this.settings.longBreakInterval,
+        notificationEnabled: this.settings.notificationEnabled
+      };
+      const settingsJson = JSON.stringify(plainSettings);
+
+      // 写入首选项
       this.pref.put('taskList', tasksJson);
       this.pref.put('settings', settingsJson);
       this.pref.flush(); // 刷盘
