@@ -51,6 +51,18 @@
     {
       "name": "app_primary_red_500",
       "value": "#F08080"
+    },
+    {
+      "name": "focus_circle_bg",
+      "value": "#FDECEC"
+    },
+    {
+      "name": "short_rest_circle_bg",
+      "value": "#cef0de"
+    },
+    {
+      "name": "long_rest_circle_bg",
+      "value": "#d2e1f9"
     }
   ]
 }

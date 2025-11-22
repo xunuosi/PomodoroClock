@@ -17,14 +17,31 @@ export struct TimerView {
   // --- 2. 核心逻辑：获取当前主题色 ---
   // 如果是 Focus 模式显示红色，否则（Short/Long）显示绿色
   get themeColor(): ResourceStr {
-    return this.store.currentMode === TimerMode.Focus ? $r('app.color.app_primary_red_500') : $r('app.color.green_500');
+    if (this.store.currentMode === TimerMode.Focus) {
+      return $r('app.color.app_primary_red_500');
+    } else if (this.store.currentMode === TimerMode.Short) {
+      return $r('app.color.green_500');
+    } else {
+      // ✅ [修改] 长休息返回蓝色
+      return $r('app.color.blue_500');
+    }
+  }
+
+  get circleBackgroundColor(): ResourceStr {
+    if (this.store.currentMode === TimerMode.Focus) {
+      return $r('app.color.focus_circle_bg');
+    } else if (this.store.currentMode === TimerMode.Short) {
+      return $r('app.color.short_rest_circle_bg');
+    } else {
+      return $r('app.color.long_rest_circle_bg');
+    }
   }
 
   get statusText(): ResourceStr {
     if (!this.store.isRunning) {
       return $r('app.string.app_h_stopped');
     }
-    // 如果是 Focus 显示 FOCUSING，否则显示“休息中”
+    // 专注显示“专注中”，其他（短/长休息）都显示“休息中”
     return this.store.currentMode === TimerMode.Focus ? $r('app.string.app_focusing') : $r('app.string.app_resting');
   }
 
@@ -160,7 +177,7 @@ export struct TimerView {
       Circle()
         .width(280)
         .height(280)
-        .fill(this.ColorLightRed)
+        .fill(this.circleBackgroundColor)
 
       Progress({ value: this.store.timeLeft, total: this.store.totalTime, type: ProgressType.Ring })
         .width(280)
