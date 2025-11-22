@@ -136,7 +136,15 @@ export struct TimerView {
         .fontSize(24)
         .fontColor([$r('app.color.989A9C')])
         .fontWeight(FontWeight.Medium)            // 可选：设置粗细
-        .renderingStrategy(SymbolRenderingStrategy.SINGLE) // 可选：单色渲染
+        .renderingStrategy(SymbolRenderingStrategy.SINGLE)
+        .onClick(() => {
+          // 跳转到 'Settings' 并传递当前的 store 实例
+          // 这样 Settings 页面修改的数据会直接同步回 TimerView
+          const navInfo = this.queryNavigationInfo();
+          if (navInfo) {
+            navInfo.pathStack.pushPath({ name: 'Settings', param: this.store });
+          }
+        })
     }
     .width('100%')
     .padding({ left: 20, right: 20, top: 0, bottom: 10 })

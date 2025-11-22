@@ -1,6 +1,10 @@
 {
   "string": [
     {
+      "name": "app_version",
+      "value": "v1.0.0"
+    },
+    {
       "name": "module_desc",
       "value": "module description"
     },
@@ -59,6 +63,66 @@
     {
       "name": "tasks_hint",
       "value": "待办任务"
+    },
+    {
+      "name": "settings_title",
+      "value": "设置"
+    },
+    {
+      "name": "settings_done",
+      "value": "完成"
+    },
+    {
+      "name": "settings_timer_config",
+      "value": "计时器配置 (分钟)"
+    },
+    {
+      "name": "settings_focus_duration",
+      "value": "专注时长"
+    },
+    {
+      "name": "settings_short_break_duration",
+      "value": "短休息时长"
+    },
+    {
+      "name": "settings_long_break_duration",
+      "value": "长休息时长"
+    },
+    {
+      "name": "settings_automation",
+      "value": "自动化"
+    },
+    {
+      "name": "settings_auto_start_break",
+      "value": "自动开始休息"
+    },
+    {
+      "name": "settings_auto_start_focus",
+      "value": "自动开始专注"
+    },
+    {
+      "name": "settings_long_break_interval",
+      "value": "长休息间隔"
+    },
+    {
+      "name": "settings_long_break_interval_desc",
+      "value": "完成多少个番茄后进入长休息"
+    },
+    {
+      "name": "settings_notification",
+      "value": "通知与反馈"
+    },
+    {
+      "name": "settings_timer_finished_alert",
+      "value": "计时结束提醒"
+    },
+    {
+      "name": "settings_timer_finished_alert_desc",
+      "value": "播放声音并发送系统通知"
+    },
+    {
+      "name": "settings_version",
+      "value": "番茄时钟版本 %s"
     }
   ]
 }

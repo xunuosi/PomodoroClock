@@ -2,6 +2,8 @@
 
 import { SplashPage } from './SplashPage';
 import { TimerView } from './TimerView';
+import { SettingsView } from './SettingsView';
+import { TimerStore } from '../model/TimerModel';
 
 @Entry
 @ComponentV2
@@ -13,11 +15,14 @@ struct AppEntry {
   }
 
   @Builder
-  PageMap(name: string) {
+  PageMap(name: string, param?: Object) {
     if (name === 'Splash') {
       SplashPage()
     } else if (name === 'Home') {
       TimerView()
+    } else if (name === 'Settings') {
+      // ✅ 注册 Settings 路由，并将传入的 store (param) 传给页面
+      SettingsView({ store: param as TimerStore })
     }
   }
 
@@ -31,8 +36,6 @@ struct AppEntry {
     .mode(NavigationMode.Stack)
     .height('100%')
     .width('100%')
-    // ✅【加固】明确声明 Navigation 容器本身占据全屏（包括状态栏区域）
-    // 这样它内部的 NavDestination (Splash/TimerView) 才有资格去处理是否避让
     .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }
 }

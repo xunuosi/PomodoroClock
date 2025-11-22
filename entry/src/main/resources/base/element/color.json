@@ -67,6 +67,26 @@
     {
       "name": "text_hint",
       "value": "#9ba9bd"
+    },
+    {
+      "name": "text_primary",
+      "value": "#2B333E"
+    },
+    {
+      "name": "text_secondary",
+      "value": "#989A9C"
+    },
+    {
+      "name": "text_tertiary",
+      "value": "#C0C0C0"
+    },
+    {
+      "name": "divider",
+      "value": "#F0F0F0"
+    },
+    {
+      "name": "setting_btn_bg",
+      "value": "#F0F2F5"
     }
   ]
 }

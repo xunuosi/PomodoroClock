@@ -21,6 +21,19 @@ export class TaskItem {
   }
 }
 
+@ObservedV2
+export class SettingsModel {
+  @Trace focusDuration: number = 25;      // 专注时长 (分钟)
+  @Trace shortBreakDuration: number = 5;  // 短休息时长 (分钟)
+  @Trace longBreakDuration: number = 15;  // 长休息时长 (分钟)
+
+  @Trace autoStartBreaks: boolean = false;   // 自动开始休息
+  @Trace autoStartFocus: boolean = false;    // 自动开始专注
+  @Trace longBreakInterval: number = 4;      // 长休息间隔 (几个番茄后)
+
+  @Trace notificationEnabled: boolean = true; // 计时结束提醒
+}
+
 // 使用 V2 装饰器修饰类，实现深度观测
 @ObservedV2
 export class TimerStore {
@@ -31,6 +44,9 @@ export class TimerStore {
   // ✅ [修改] 将 string[] 改为 TaskItem[]
   @Trace taskList: TaskItem[] = [];
 
+  @Trace settings: SettingsModel = new SettingsModel();
+  @Trace completedPomodoros: number = 0; // 当前循环已完成的专注次数
+
   private timerId: number = -1;
 
   // 切换模式
@@ -39,12 +55,13 @@ export class TimerStore {
     this.currentMode = mode;
     this.isRunning = false;
 
+    // ✅ 从配置中读取时长
     if (mode === TimerMode.Focus) {
-      this.totalTime = 25 * 60;
+      this.totalTime = this.settings.focusDuration * 60;
     } else if (mode === TimerMode.Short) {
-      this.totalTime = 5 * 60;
+      this.totalTime = this.settings.shortBreakDuration * 60;
     } else {
-      this.totalTime = 15 * 60;
+      this.totalTime = this.settings.longBreakDuration * 60;
     }
     this.timeLeft = this.totalTime;
   }
@@ -60,11 +77,48 @@ export class TimerStore {
         if (this.timeLeft > 0) {
           this.timeLeft--;
         } else {
-          this.stopTimer();
-          this.isRunning = false;
-          promptAction.showToast({ message: 'Time is up!' });
+          // 🛑 倒计时结束逻辑
+          this.handleTimerComplete();
         }
       }, 1000);
+    }
+  }
+
+  private handleTimerComplete() {
+    this.stopTimer();
+    this.isRunning = false;
+
+    // 1. 提醒 (声音/震动)
+    if (this.settings.notificationEnabled) {
+      promptAction.showToast({ message: '⏰ 计时结束！' });
+      // 这里可以后续接入 AVPlayer 播放音效或 Vibrator 震动
+    }
+
+    // 2. 自动化流转逻辑
+    if (this.currentMode === TimerMode.Focus) {
+      // --- 专注结束 ---
+      this.completedPomodoros++;
+
+      // 判断是否达到长休息间隔
+      if (this.completedPomodoros % this.settings.longBreakInterval === 0) {
+        this.switchMode(TimerMode.Long);
+      } else {
+        this.switchMode(TimerMode.Short);
+      }
+
+      // 自动开始休息？
+      if (this.settings.autoStartBreaks) {
+        this.toggleTimer();
+      }
+
+    } else {
+      // --- 休息结束 (无论是短还是长) ---
+      this.switchMode(TimerMode.Focus);
+
+      // 自动开始专注？
+      if (this.settings.autoStartFocus) {
+        this.toggleTimer();
+      }
     }
   }
 
