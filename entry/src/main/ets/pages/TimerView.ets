@@ -11,10 +11,22 @@ export struct TimerView {
   @Local topMargin: number = 0;
 
   // 颜色常量
-  private readonly ColorPrimary: string = '#F08080';
   private readonly ColorDark: string = '#2B333E';
-  private readonly ColorBg: string = '#F7F8FA';
   private readonly ColorLightRed: string = '#FDECEC';
+
+  // --- 2. 核心逻辑：获取当前主题色 ---
+  // 如果是 Focus 模式显示红色，否则（Short/Long）显示绿色
+  get themeColor(): ResourceStr {
+    return this.store.currentMode === TimerMode.Focus ? $r('app.color.app_primary_red_500') : $r('app.color.green_500');
+  }
+
+  get statusText(): ResourceStr {
+    if (!this.store.isRunning) {
+      return $r('app.string.app_h_stopped');
+    }
+    // 如果是 Focus 显示 FOCUSING，否则显示“休息中”
+    return this.store.currentMode === TimerMode.Focus ? $r('app.string.app_focusing') : $r('app.string.app_resting');
+  }
 
   aboutToAppear(): void {
     // ✅ 获取 Window 实例进行设置
@@ -22,6 +34,7 @@ export struct TimerView {
       // 1. 恢复状态栏显示
       win.setWindowSystemBarEnable(['status', 'navigation']);
       win.setWindowSystemBarProperties({
+        statusBarColor: '#F7F8FA',
         statusBarContentColor: '#000000',
         navigationBarContentColor: '#000000'
       });
@@ -75,8 +88,8 @@ export struct TimerView {
           this.TasksSectionBuilder()
         }
         .width('100%')
-        .backgroundColor(this.ColorBg)
-        .padding({ top: this.topMargin, bottom: 50 }) // 底部留白，防止划到底太贴边
+        .backgroundColor($r('app.color.app_window_bg'))
+        .padding({ top: 13, bottom: 50 }) // 底部留白，防止划到底太贴边
       }
       .width('100%')
       .height('100%')
@@ -109,7 +122,7 @@ export struct TimerView {
         .renderingStrategy(SymbolRenderingStrategy.SINGLE) // 可选：单色渲染
     }
     .width('100%')
-    .padding({ left: 20, right: 20, top: 10, bottom: 10 })
+    .padding({ left: 20, right: 20, top: 0, bottom: 10 })
   }
 
   @Builder ModeSwitcherBuilder() {
@@ -152,7 +165,7 @@ export struct TimerView {
       Progress({ value: this.store.timeLeft, total: this.store.totalTime, type: ProgressType.Ring })
         .width(280)
         .height(280)
-        .color(this.ColorPrimary)
+        .color(this.themeColor)
         .style({ strokeWidth: 12 })
         .backgroundColor(Color.Transparent)
 
@@ -163,10 +176,10 @@ export struct TimerView {
           .fontWeight(FontWeight.Bold)
           .fontColor(this.ColorDark)
 
-        Text(this.store.isRunning ? $r('app.string.app_focusing') : $r('app.string.app_h_stopped'))
+        Text(this.statusText)
           .fontSize(14)
           .fontWeight(FontWeight.Bold)
-          .fontColor(this.store.isRunning ? this.ColorPrimary : '#A0A0A0')
+          .fontColor(this.store.isRunning ? this.themeColor : '#A0A0A0')
           .letterSpacing(2)
       }
     }
@@ -184,7 +197,7 @@ export struct TimerView {
       }
       .width(56)
       .height(56)
-      .backgroundColor('#FFFFFF')
+      .backgroundColor($r('sys.color.comp_background_list_card'))
       .onClick(() => {
         this.store.resetTimer();
       })
@@ -199,7 +212,7 @@ export struct TimerView {
       .borderRadius(20)
       .width(100)
       .height(64)
-      .backgroundColor(this.ColorPrimary)
+      .backgroundColor(this.themeColor)
       .onClick(() => {
         this.store.toggleTimer();
       })
@@ -277,7 +290,7 @@ export struct TimerView {
           ForEach(this.store.taskList, (task: string, index: number) => {
             ListItem() {
               Row() {
-                Circle().width(16).height(16).stroke(this.ColorPrimary).strokeWidth(2).fill(Color.Transparent).margin({ right: 10 })
+                Circle().width(16).height(16).stroke($r('app.color.app_primary_red_500')).strokeWidth(2).fill(Color.Transparent).margin({ right: 10 })
                 Text(task).fontSize(16).fontColor(this.ColorDark)
               }
               .width('100%')

@@ -35,6 +35,18 @@
     {
       "name": "989A9C",
       "value": "#989A9C"
+    },
+    {
+      "name": "app_window_bg",
+      "value": "#F7F8FA"
+    },
+    {
+      "name": "green_500",
+      "value": "#22c55e"
+    },
+    {
+      "name": "app_primary_red_500",
+      "value": "#F08080"
     }
   ]
 }

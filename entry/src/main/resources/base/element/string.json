@@ -33,6 +33,10 @@
       "value": "专注中"
     },
     {
+      "name": "app_resting",
+      "value": "休息中"
+    },
+    {
       "name": "app_h_stopped",
       "value": "已暂停"
     },
