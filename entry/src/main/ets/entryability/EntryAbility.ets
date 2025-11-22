@@ -22,26 +22,23 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    // 1. 获取应用主窗口
     let windowClass: window.Window = windowStage.getMainWindowSync();
 
-    // 2. 设置全屏布局 (让内容延伸到状态栏和导航栏后面)
+    // 设置全屏
     windowClass.setWindowLayoutFullScreen(true, (err) => {
       if (err.code) {
         console.error('Failed to set full screen. Cause:' + JSON.stringify(err));
         return;
       }
-      console.info('Succeeded in setting full screen.');
     });
 
-    // 3. (可选) 设置状态栏文字颜色
-    // 因为背景是红色的，建议把状态栏的时间/电量文字设为白色，否则黑色看不清
     windowClass.setWindowSystemBarProperties({
-      statusBarContentColor: '#FFFFFF', // 状态栏文字颜色（白）
-      navigationBarContentColor: '#FFFFFF' // 底部导航条文字颜色（白）
+      statusBarContentColor: '#FFFFFF',
+      navigationBarContentColor: '#FFFFFF'
     });
-
-    windowStage.loadContent('pages/SplashPage', (err) => {
+    
+    // 因为 Index 才是带有 @Entry 和 Navigation 容器的入口
+    windowStage.loadContent('pages/Index', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
@@ -49,7 +46,6 @@ export default class EntryAbility extends UIAbility {
       hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
     });
   }
-
   onWindowStageDestroy(): void {
     // Main window is destroyed, release UI related resources
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageDestroy');

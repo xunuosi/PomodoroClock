@@ -1,9 +1,21 @@
 import { promptAction } from '@kit.ArkUI';
 
+
 @ComponentV2
 export struct SplashPage {
+  @Local opacityValue: number = 0;
+  @Local scaleValue: number = 0.8;
+
   // --- 生命周期 ---
   aboutToAppear() {
+    // 进场动画：延迟一小段时间确保渲染就绪
+    setTimeout(() => {
+      // ✅ 使用 animateTo 替代 withAnimation
+      this.getUIContext().animateTo({ duration: 600, curve: Curve.EaseOut }, () => {
+        this.opacityValue = 1;
+        this.scaleValue = 1;
+      });
+    }, 10);
     // 模拟加载耗时，2秒后跳转到主页
     setTimeout(() => {
       this.navigateToHome();
@@ -42,6 +54,8 @@ export struct SplashPage {
             .width(120)
             .height(120)
             .objectFit(ImageFit.Contain)
+            .opacity(this.opacityValue) // 绑定透明度
+            .scale({ x: this.scaleValue, y: this.scaleValue }) // 绑定缩放
             .margin({ bottom: 10 })
 
           // 主标题
