@@ -1,4 +1,6 @@
 import { promptAction } from '@kit.ArkUI';
+import { preferences } from '@kit.ArkData';
+import { common } from '@kit.AbilityKit';
 
 // 定义计时模式枚举
 export enum TimerMode {
@@ -7,7 +9,6 @@ export enum TimerMode {
   Long = 'Long_rest'
 }
 
-// ✅ [新增] 定义任务项类，使用 V2 装饰器确保 UI 能监听到属性变化
 @ObservedV2
 export class TaskItem {
   id: number;
@@ -48,6 +49,64 @@ export class TimerStore {
   @Trace completedPomodoros: number = 0; // 当前循环已完成的专注次数
 
   private timerId: number = -1;
+  private pref: preferences.Preferences | null = null;
+
+  // 初始化并加载数据 (需要在 UIAbility 或 Page 的 aboutToAppear 中调用)
+  async initData(context: common.Context) {
+    try {
+      // 1. 获取首选项实例
+      this.pref = await preferences.getPreferences(context, 'PomodoroStore');
+
+      // 2. 加载任务列表
+      const tasksJson = await this.pref.get('taskList', '[]') as string;
+      const loadedTasks = JSON.parse(tasksJson) as TaskItem[];
+      // 重新映射为 TaskItem 实例以确保 @ObservedV2 生效 (如果是纯对象数组可能失去响应性，最好重新 new)
+      // 但在 V2 中，只要数组替换，且元素结构一致通常没问题。为了稳妥：
+      this.taskList = loadedTasks.map(t => {
+        let item = new TaskItem(t.content);
+        item.id = t.id;
+        item.isCompleted = t.isCompleted;
+        return item;
+      });
+
+      // 3. 加载设置
+      const settingsJson = await this.pref.get('settings', '') as string;
+      if (settingsJson) {
+        const savedSettings = JSON.parse(settingsJson) as SettingsModel;
+        // 逐个赋值以保持响应性
+        this.settings.focusDuration = savedSettings.focusDuration;
+        this.settings.shortBreakDuration = savedSettings.shortBreakDuration;
+        this.settings.longBreakDuration = savedSettings.longBreakDuration;
+        this.settings.autoStartBreaks = savedSettings.autoStartBreaks;
+        this.settings.autoStartFocus = savedSettings.autoStartFocus;
+        this.settings.longBreakInterval = savedSettings.longBreakInterval;
+        this.settings.notificationEnabled = savedSettings.notificationEnabled;
+      }
+
+      // 4. 初始化时间 (如果之前保存了状态，也可以恢复，这里暂时重置为配置时长)
+      this.resetTimer();
+
+    } catch (err) {
+      console.error('Failed to load data:', JSON.stringify(err));
+    }
+  }
+
+  // 保存数据到磁盘
+  saveData() {
+    if (!this.pref) return;
+    try {
+      // 序列化
+      const tasksJson = JSON.stringify(this.taskList);
+      const settingsJson = JSON.stringify(this.settings);
+
+      // 写入
+      this.pref.put('taskList', tasksJson);
+      this.pref.put('settings', settingsJson);
+      this.pref.flush(); // 刷盘
+    } catch (err) {
+      console.error('Failed to save data:', JSON.stringify(err));
+    }
+  }
 
   // 切换模式
   switchMode(mode: TimerMode) {
@@ -55,7 +114,6 @@ export class TimerStore {
     this.currentMode = mode;
     this.isRunning = false;
 
-    // ✅ 从配置中读取时长
     if (mode === TimerMode.Focus) {
       this.totalTime = this.settings.focusDuration * 60;
     } else if (mode === TimerMode.Short) {
@@ -143,17 +201,20 @@ export class TimerStore {
   addTask(taskName: string) {
     if (taskName.trim() !== '') {
       this.taskList.push(new TaskItem(taskName));
+      this.saveData();
     }
   }
 
   toggleTask(task: TaskItem) {
     task.isCompleted = !task.isCompleted;
+    this.saveData();
   }
 
   deleteTask(task: TaskItem) {
     const index = this.taskList.indexOf(task);
     if (index !== -1) {
       this.taskList.splice(index, 1);
+      this.saveData();
     }
   }
 

@@ -5,7 +5,7 @@ import { window } from '@kit.ArkUI';
 @ComponentV2
 export struct TimerView {
   // 接收外部传入的 VM，或者内部实例化
-  @Local store: TimerStore = new TimerStore();
+  @Param store: TimerStore = new TimerStore();
   @Local newTaskName: string = '';
   // ✅ 新增：顶部避让高度状态
   @Local topMargin: number = 0;

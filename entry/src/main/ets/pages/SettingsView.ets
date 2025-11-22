@@ -64,27 +64,47 @@ export struct SettingsView {
 
             // 1. 计时器配置
             SettingCard({ title: $r('app.string.settings_timer_config') }) {
-              this.CounterRow($r('app.string.settings_focus_duration'), this.store.settings.focusDuration, (val: number) => this.store.settings.focusDuration = val)
+              this.CounterRow($r('app.string.settings_focus_duration'), this.store.settings.focusDuration, (val: number) => {
+                this.store.settings.focusDuration = val;
+                this.store.saveData();
+              })
               Divider().color($r('app.color.divider'))
-              this.CounterRow($r('app.string.settings_short_break_duration'), this.store.settings.shortBreakDuration, (val: number) => this.store.settings.shortBreakDuration = val)
+              this.CounterRow($r('app.string.settings_short_break_duration'), this.store.settings.shortBreakDuration, (val: number) => {
+                this.store.settings.shortBreakDuration = val;
+                this.store.saveData();
+              })
               Divider().color($r('app.color.divider'))
-              this.CounterRow($r('app.string.settings_long_break_duration'), this.store.settings.longBreakDuration, (val: number) => this.store.settings.longBreakDuration = val)
+              this.CounterRow($r('app.string.settings_long_break_duration'), this.store.settings.longBreakDuration, (val: number) => {
+                this.store.settings.longBreakDuration = val;
+                this.store.saveData();
+              })
             }
 
             // 2. 自动化配置
             SettingCard({ title: $r('app.string.settings_automation') }) {
-              this.ToggleRow($r('app.string.settings_auto_start_break'), this.store.settings.autoStartBreaks, (val: boolean) => this.store.settings.autoStartBreaks = val)
+              this.ToggleRow($r('app.string.settings_auto_start_break'), this.store.settings.autoStartBreaks, (val: boolean) => {
+                this.store.settings.autoStartBreaks = val;
+                this.store.saveData();
+              })
               Divider().color($r('app.color.divider'))
-              this.ToggleRow($r('app.string.settings_auto_start_focus'), this.store.settings.autoStartFocus, (val: boolean) => this.store.settings.autoStartFocus = val)
+              this.ToggleRow($r('app.string.settings_auto_start_focus'), this.store.settings.autoStartFocus, (val: boolean) => {
+                this.store.settings.autoStartFocus = val;
+                this.store.saveData();
+              })
               Divider().color($r('app.color.divider'))
-              this.CounterRow($r('app.string.settings_long_break_interval'), this.store.settings.longBreakInterval, (val: number) => this.store.settings.longBreakInterval = val, $r('app.string.settings_long_break_interval_desc'))
+              this.CounterRow($r('app.string.settings_long_break_interval'), this.store.settings.longBreakInterval, (val: number) => {
+                this.store.settings.longBreakInterval = val;
+                this.store.saveData();
+              }, $r('app.string.settings_long_break_interval_desc'))
             }
 
             // 3. 通知配置
             SettingCard({ title: $r('app.string.settings_notification') }) {
-              this.ToggleRow($r('app.string.settings_timer_finished_alert'), this.store.settings.notificationEnabled, (val: boolean) => this.store.settings.notificationEnabled = val, $r('app.string.settings_timer_finished_alert_desc'))
+              this.ToggleRow($r('app.string.settings_timer_finished_alert'), this.store.settings.notificationEnabled, (val: boolean) => {
+                this.store.settings.notificationEnabled = val;
+                this.store.saveData();
+              }, $r('app.string.settings_timer_finished_alert_desc'))
             }
-
             // 底部版本号
             Text($r('app.string.settings_version', $r('app.string.app_version')))
               .fontSize(12)
