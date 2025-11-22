@@ -121,6 +121,7 @@ struct ToggleRow {
   }
 }
 
+@Preview
 @ComponentV2
 export struct SettingsView {
   @Param store: TimerStore = new TimerStore();
@@ -269,6 +270,7 @@ export struct SettingsView {
 
           }
           .padding({ left: 16, right: 16 })
+          .margin({ top: -32 })
         }
         .scrollBar(BarState.Off)
         .layoutWeight(1)
