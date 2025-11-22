@@ -45,6 +45,10 @@
       "value": "#22c55e"
     },
     {
+      "name": "blue_500",
+      "value": "#3b82f6"
+    },
+    {
       "name": "app_primary_red_500",
       "value": "#F08080"
     }
