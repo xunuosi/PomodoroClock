@@ -1,16 +1,53 @@
 import { TimerStore, TimerMode } from '../model/TimerModel';
+import { window } from '@kit.ArkUI';
 
 @ComponentV2
 export struct TimerView {
   // 接收外部传入的 VM，或者内部实例化
   @Local store: TimerStore = new TimerStore();
   @Local newTaskName: string = '';
+  // ✅ 新增：顶部避让高度状态
+  @Local topMargin: number = 0;
 
   // 颜色常量
   private readonly ColorPrimary: string = '#F08080';
   private readonly ColorDark: string = '#2B333E';
   private readonly ColorBg: string = '#F7F8FA';
   private readonly ColorLightRed: string = '#FDECEC';
+
+  aboutToAppear(): void {
+    // ✅ 获取 Window 实例进行设置
+    window.getLastWindow(this.getUIContext().getHostContext()).then((win) => {
+      // 1. 恢复状态栏显示
+      win.setWindowSystemBarEnable(['status', 'navigation']);
+      win.setWindowSystemBarProperties({
+        statusBarContentColor: '#000000',
+        navigationBarContentColor: '#000000'
+      });
+      // 2. 定义获取高度的逻辑
+      const updateHeight = (area: window.AvoidArea) => {
+        const height = this.getUIContext().px2vp(area.topRect.height);
+        // 只有当高度大于0（状态栏真的出现了）才更新，避免闪烁
+        if (height > 0) {
+          this.topMargin = height;
+        }
+      };
+
+      // 3. 【初次尝试】获取当前高度 (可能还是0，但试一下无妨)
+      let type = window.AvoidAreaType.TYPE_SYSTEM;
+      let avoidArea = win.getWindowAvoidArea(type);
+      updateHeight(avoidArea);
+
+      // 4. 【核心修复】监听高度变化事件
+      // 当状态栏从“隐藏”变为“显示”的过程中，这个回调会被触发，
+      // 从而自动修正 topMargin，把 UI 挤下来。
+      win.on('avoidAreaChange', (data) => {
+        if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
+          updateHeight(data.area);
+        }
+      });
+    });
+  }
 
   aboutToDisappear(): void {
     this.store.stopTimer();
@@ -38,8 +75,10 @@ export struct TimerView {
       .width('100%')
       .height('100%')
       .backgroundColor(this.ColorBg)
+      // ✅ 关键修复：手动添加顶部 Padding，避开状态栏
+      .padding({ top: this.topMargin })
       // API 17+ 使用 expandSafeArea 处理沉浸式，不再需要手动计算 padding
-      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
+      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
     }
     .hideTitleBar(true) // 隐藏系统默认标题栏，使用自定义 Header
   }

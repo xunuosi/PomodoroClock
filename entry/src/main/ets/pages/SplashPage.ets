@@ -1,5 +1,4 @@
-import { promptAction } from '@kit.ArkUI';
-
+import { promptAction, window } from '@kit.ArkUI';
 
 @ComponentV2
 export struct SplashPage {
@@ -8,6 +7,12 @@ export struct SplashPage {
 
   // --- 生命周期 ---
   aboutToAppear() {
+
+    window.getLastWindow(this.getUIContext().getHostContext()).then((win) => {
+      win.setWindowSystemBarEnable([]);
+    })
+
+
     // 进场动画：延迟一小段时间确保渲染就绪
     setTimeout(() => {
       // ✅ 使用 animateTo 替代 withAnimation

@@ -31,11 +31,6 @@ export default class EntryAbility extends UIAbility {
         return;
       }
     });
-
-    windowClass.setWindowSystemBarProperties({
-      statusBarContentColor: '#FFFFFF',
-      navigationBarContentColor: '#FFFFFF'
-    });
     
     // 因为 Index 才是带有 @Entry 和 Navigation 容器的入口
     windowStage.loadContent('pages/Index', (err) => {
