@@ -18,7 +18,7 @@
         "icon": "$media:icon_1024",
         "label": "$string:EntryAbility_label",
         "startWindowIcon": "$media:transparent",
-        "startWindowBackground": "$color:start_window_background", // 纯红色背景
+        "startWindowBackground": "$color:start_window_background",
         "exported": true,
         "skills": [
           {
@@ -47,9 +47,9 @@
       }
     ],
     "requestPermissions": [
-      {
-        "name": "ohos.permission.INTERNET"
-      }
+//      {
+//        "name": "ohos.permission.INTERNET"
+//      }
     ]
   }
 }

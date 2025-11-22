@@ -3,8 +3,8 @@ import { promptAction } from '@kit.ArkUI';
 // 定义计时模式枚举
 export enum TimerMode {
   Focus = 'Focus',
-  Short = 'Short',
-  Long = 'Long'
+  Short = 'Short_rest',
+  Long = 'Long_rest'
 }
 
 // 使用 V2 装饰器修饰类，实现深度观测

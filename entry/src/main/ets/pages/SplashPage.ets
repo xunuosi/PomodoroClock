@@ -24,7 +24,7 @@ export struct SplashPage {
     // 模拟加载耗时，2秒后跳转到主页
     setTimeout(() => {
       this.navigateToHome();
-    }, 2000);
+    }, 1000);
   }
 
   // --- 逻辑方法 ---
@@ -64,13 +64,13 @@ export struct SplashPage {
             .margin({ bottom: 10 })
 
           // 主标题
-          Text('Tomatodo')
+          Text($r('app.string.app_name'))
             .fontSize(36)
             .fontWeight(FontWeight.Bold)
             .fontColor('#2B333E')
 
           // 副标题
-          Text('Master your time')
+          Text($r('app.string.app_slogan'))
             .fontSize(16)
             .fontColor('#989A9C')
             .letterSpacing(0.5)

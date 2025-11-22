@@ -10,7 +10,51 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "TomatoTimer"
+      "value": "番茄时钟"
+    },
+    {
+      "name": "app_slogan",
+      "value": "掌控你的时间"
+    },
+    {
+      "name": "app_focus",
+      "value": "专注"
+    },
+    {
+      "name": "app_short_rest",
+      "value": "短休息"
+    },
+    {
+      "name": "app_long_rest",
+      "value": "长休息"
+    },
+    {
+      "name": "app_focusing",
+      "value": "专注中"
+    },
+    {
+      "name": "app_h_stopped",
+      "value": "已暂停"
+    },
+    {
+      "name": "app_add_task_hint",
+      "value": "添加新任务..."
+    },
+    {
+      "name": "app_empty_task_hint",
+      "value": "暂无任务。"
+    },
+    {
+      "name": "app_add_task_slogan",
+      "value": "添加一个开始专注吧！"
+    },
+    {
+      "name": "sessions_count",
+      "value": "完成次数 %d"
+    },
+    {
+      "name": "tasks_hint",
+      "value": "待办任务"
     }
   ]
 }

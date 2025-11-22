@@ -96,7 +96,7 @@ export struct TimerView {
         Image($r('app.media.tomatodo_logo'))
           .width(24)
           .height(24)
-        Text('Tomatodo')
+        Text($r('app.string.app_name'))
           .fontSize(20)
           .fontWeight(FontWeight.Bold)
           .fontColor(this.ColorDark)
@@ -114,9 +114,9 @@ export struct TimerView {
 
   @Builder ModeSwitcherBuilder() {
     Row() {
-      this.ModeButton('Focus', TimerMode.Focus)
-      this.ModeButton('Short', TimerMode.Short)
-      this.ModeButton('Long', TimerMode.Long)
+      this.ModeButton($r('app.string.app_focus'), TimerMode.Focus)
+      this.ModeButton($r('app.string.app_short_rest'), TimerMode.Short)
+      this.ModeButton($r('app.string.app_long_rest'), TimerMode.Long)
     }
     .width('90%')
     .height(48)
@@ -127,7 +127,7 @@ export struct TimerView {
     .padding(4)
   }
 
-  @Builder ModeButton(text: string, mode: TimerMode) {
+  @Builder ModeButton(text: ResourceStr, mode: TimerMode) {
     Button(text)
       .type(ButtonType.Capsule)
       // 直接读取 store 中的状态
@@ -163,7 +163,7 @@ export struct TimerView {
           .fontWeight(FontWeight.Bold)
           .fontColor(this.ColorDark)
 
-        Text(this.store.isRunning ? 'FOCUSING' : 'PAUSED')
+        Text(this.store.isRunning ? $r('app.string.app_focusing') : $r('app.string.app_h_stopped'))
           .fontSize(14)
           .fontWeight(FontWeight.Bold)
           .fontColor(this.store.isRunning ? this.ColorPrimary : '#A0A0A0')
@@ -210,13 +210,13 @@ export struct TimerView {
   @Builder TasksSectionBuilder() {
     Column() {
       Row() {
-        Text('TASKS')
+        Text($r('app.string.tasks_hint'))
           .fontSize(14)
           .fontWeight(FontWeight.Bold)
           .fontColor('#989A9C')
           .letterSpacing(1)
         Blank()
-        Text(`SESSIONS ${this.store.taskList.length}`)
+        Text($r('app.string.sessions_count', this.store.taskList.length))
           .fontSize(12)
           .fontColor('#989A9C')
           .backgroundColor('#F0F0F0')
@@ -227,7 +227,7 @@ export struct TimerView {
       .margin({ bottom: 16 })
 
       Row({ space: 12 }) {
-        TextInput({ placeholder: 'Add a new task...', text: this.newTaskName })
+        TextInput({ placeholder: $r('app.string.app_add_task_hint'), text: this.newTaskName })
           .layoutWeight(1)
           .height(48)
           .backgroundColor('#F7F8FA')
@@ -259,11 +259,11 @@ export struct TimerView {
 
       if (this.store.taskList.length === 0) {
         Column({ space: 4 }) {
-          Text('No tasks yet.')
+          Text($r('app.string.app_empty_task_hint'))
             .fontSize(14)
             .fontColor('#C0C0C0')
             .fontStyle(FontStyle.Italic)
-          Text('Add one to get started!')
+          Text($r('app.string.app_add_task_slogan'))
             .fontSize(14)
             .fontColor('#C0C0C0')
             .fontStyle(FontStyle.Italic)
