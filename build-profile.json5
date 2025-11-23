@@ -25,19 +25,6 @@
     ],
     "signingConfigs": [
       {
-        "name": "selfrelease",
-        "type": "HarmonyOS",
-        "material": {
-          "storeFile": "/Users/xunuosi/Code/MySelf/hm-self-key",
-          "storePassword": "0000001C63F09622291AACA9D33DCADB024FAA2A8315D5DB9DD27465D71CA03BB8FF9DB56820D165F418DA17",
-          "keyAlias": "hm-self-key",
-          "keyPassword": "0000001C36A216F65AE6BD3BCBD0BBAEACCE9906AC51FC4330D82734F9494B53A9CACC659D760D9DF2836D98",
-          "signAlg": "SHA256withECDSA",
-          "profile": "/Users/xunuosi/Code/MySelf/hm-self-cert",
-          "certpath": "/Users/xunuosi/Code/MySelf/hm-self-cert"
-        }
-      },
-      {
         "name": "default",
         "type": "HarmonyOS",
         "material": {
@@ -54,13 +41,13 @@
         "name": "defaultwin",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\xunuosi\\.ohos\\config\\defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.cer",
+          "certpath": "C:/Users/xunuosi/.ohos/config/defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001BCF3C847A98F068D90C43892C9E19E54760436F0DF7F6E85CF483C52207EAD26B5B3AC73EFB2DE7",
-          "profile": "C:\\Users\\xunuosi\\.ohos\\config\\defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p7b",
+          "keyPassword": "0000001B4FFBD50581D7A34490D2E375F7BB96B2ED1307A2ACE9821EA53FC216CD118CF0B6231AEFE0AB96",
+          "profile": "C:/Users/xunuosi/.ohos/config/defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\xunuosi\\.ohos\\config\\defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p12",
-          "storePassword": "0000001B02D78530DFED5E44DA986047F5116ADD4FA36163A98178A75A1C8A6233A056F6B5EB3B729B1A28"
+          "storeFile": "C:/Users/xunuosi/.ohos/config/defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p12",
+          "storePassword": "0000001BE42C03D4F2DE722F951BCBCA61A535B4622FA941774C7B15B883EE0EEFEE7679369862807B4DCC"
         }
       }
     ]

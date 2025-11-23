@@ -1,5 +1,6 @@
-import { promptAction, window } from '@kit.ArkUI';
+import { window } from '@kit.ArkUI';
 
+@Preview
 @ComponentV2
 export struct SplashPage {
   @Local opacityValue: number = 0;
