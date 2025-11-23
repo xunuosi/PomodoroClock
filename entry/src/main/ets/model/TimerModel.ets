@@ -1,6 +1,10 @@
-import { promptAction } from '@kit.ArkUI';
+import { UIContext } from '@kit.ArkUI';
 import { preferences } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
+import { notificationManager } from '@kit.NotificationKit';
+import { vibrator } from '@kit.SensorServiceKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+
 
 // 定义计时模式枚举
 export enum TimerMode {
@@ -76,10 +80,14 @@ export class TimerStore {
 
   private timerId: number = -1;
   private pref: preferences.Preferences | null = null;
+  private uiContext: UIContext | null = null;
 
   // 初始化并加载数据 (需要在 UIAbility 或 Page 的 aboutToAppear 中调用)
-  async initData(context: common.Context) {
+  async initData(uiContext: UIContext) {
     try {
+      this.uiContext = uiContext; // 保存 UIContext
+      // 通过 UIContext 获取 HostContext (UIAbilityContext) 用于首选项
+      const context = uiContext.getHostContext() as common.UIAbilityContext;
       // 获取实例
       this.pref = await preferences.getPreferences(context, 'PomodoroStore');
 
@@ -202,8 +210,12 @@ export class TimerStore {
 
     // 1. 提醒 (声音/震动)
     if (this.settings.notificationEnabled) {
-      promptAction.showToast({ message: '⏰ 计时结束！' });
-      // 这里可以后续接入 AVPlayer 播放音效或 Vibrator 震动
+      // ✅ 修改：使用 uiContext 调用 showToast
+      if (this.uiContext) {
+        this.uiContext.getPromptAction().showToast({ message: '⏰ 计时结束！' });
+      }
+
+      this.triggerFeedback();
     }
 
     // 2. 自动化流转逻辑
@@ -231,6 +243,70 @@ export class TimerStore {
       if (this.settings.autoStartFocus) {
         this.toggleTimer();
       }
+    }
+  }
+
+  // 触发反馈（震动 + 通知）
+  private async triggerFeedback() {
+    // 1. 触发震动 (持续 1 秒)
+    try {
+      // 检查设备是否支持震动
+      vibrator.startVibration({
+        type: 'time',
+        duration: 1000, // 震动时长 1000ms
+      }, {
+        id: 0,
+        usage: 'alarm' // 用途：闹钟/提醒
+      }, (error: BusinessError) => {
+        if (error) {
+          console.error(`Vibration failed, code: ${error.code}, message: ${error.message}`);
+        }
+      });
+    } catch (err) {
+      console.error('Vibration error:', JSON.stringify(err));
+    }
+    // 1. 定义默认文案 (兜底用)
+    let title = '通知';
+    let text = '计时结束';
+    let additionalInfo = 'Tomatodo';
+
+    if (this.uiContext) {
+      try {
+        const context = this.uiContext.getHostContext() as common.UIAbilityContext;
+        const resMgr = context.resourceManager;
+
+        if (this.currentMode === TimerMode.Focus) {
+          title = resMgr.getStringSync($r('app.string.notify_focus_title'));
+          text = resMgr.getStringSync($r('app.string.notify_focus_text'));
+        } else {
+          title = resMgr.getStringSync($r('app.string.notify_rest_title'));
+          text = resMgr.getStringSync($r('app.string.notify_rest_text'));
+        }
+
+        // 获取应用名
+        additionalInfo = resMgr.getStringSync($r('app.string.app_name'));
+
+      } catch (e) {
+        console.error('Failed to get string resource:', JSON.stringify(e));
+      }
+    }
+
+    const notificationRequest: notificationManager.NotificationRequest = {
+      id: 1001, // 通知ID
+      content: {
+        notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT,
+        normal: {
+          title: title,
+          text: text,
+          additionalText: additionalInfo
+        }
+      },
+    };
+
+    try {
+      await notificationManager.publish(notificationRequest);
+    } catch (err) {
+      console.error(`Notification failed, code: ${err.code}, message: ${err.message}`);
     }
   }
 

@@ -40,7 +40,7 @@ export struct SplashPage {
       pathStack.replacePath({ name: 'Home' });
     } else {
       // 异常处理：如果获取不到栈（极少情况），做个兜底提示
-      promptAction.showToast({ message: 'Navigation stack not found' });
+      this.getUIContext().getPromptAction().showToast({ message: 'Navigation stack not found' });
     }
   }
 

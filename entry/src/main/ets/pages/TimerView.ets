@@ -182,10 +182,20 @@ export struct TimerView {
 
   @Builder TimerCircleBuilder() {
     Stack({ alignContent: Alignment.Center }) {
-      Circle()
+      Column()
         .width(280)
         .height(280)
-        .fill(this.circleBackgroundColor)
+        .borderRadius(140) // 关键：宽高的一半，剪裁成正圆
+        .radialGradient({
+          center: ['50%', '50%'],
+          radius: 220,
+          colors: [
+            // 0.0 (中心) -> 主体背景色
+            [this.circleBackgroundColor, 0.0],
+            // 1.0 (边缘) -> 纯白 (逐渐变浅)
+            [Color.White, 1.0]
+          ]
+        })
 
       Progress({ value: this.store.timeLeft, total: this.store.totalTime, type: ProgressType.Ring })
         .width(280)

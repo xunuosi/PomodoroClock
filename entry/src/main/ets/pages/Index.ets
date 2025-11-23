@@ -14,9 +14,7 @@ struct AppEntry {
 
   aboutToAppear(): void {
     this.pageStack.pushPath({ name: 'Splash' });
-    // 获取 Context 并初始化 Store 数据
-    const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.store.initData(context);
+    this.store.initData(this.getUIContext());
   }
 
   @Builder

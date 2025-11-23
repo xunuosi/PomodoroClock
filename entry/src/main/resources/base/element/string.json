@@ -73,7 +73,7 @@
       "value": "完成"
     },
     {
-      "name": "settings_timer_config",
+        "name": "settings_timer_config",
       "value": "计时器配置 (分钟)"
     },
     {
@@ -123,6 +123,22 @@
     {
       "name": "settings_version",
       "value": "番茄时钟版本 %s"
+    },
+    {
+      "name": "notify_focus_title",
+      "value": "专注目标达成！"
+    },
+    {
+      "name": "notify_focus_text",
+      "value": "太棒了！大脑已满载，休息一下充个电，喝杯水放松双眼吧。"
+    },
+    {
+      "name": "notify_rest_title",
+      "value": "休息时间结束"
+    },
+    {
+      "name": "notify_rest_text",
+      "value": "充电完毕！准备好迎接下一个挑战了吗？开始新的专注吧！"
     }
   ]
 }
