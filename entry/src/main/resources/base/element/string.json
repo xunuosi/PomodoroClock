@@ -139,6 +139,10 @@
     {
       "name": "notify_rest_text",
       "value": "充电完毕！准备好迎接下一个挑战了吗？开始新的专注吧！"
+    },
+    {
+      "name": "permission_vibrate",
+      "value": "用于消息提醒"
     }
   ]
 }

@@ -49,6 +49,13 @@
     "requestPermissions": [
       {
         "name": "ohos.permission.VIBRATE",
+        "reason": "$string:permission_vibrate",
+        "usedScene": {
+          "abilities": [
+            "MainAbility"
+          ],
+          "when": "always"
+        }
       }
     ]
   }
