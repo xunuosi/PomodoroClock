@@ -272,6 +272,7 @@ export struct SettingsView {
           .padding({ left: 16, right: 16 })
           .margin({ top: -32 })
         }
+        .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
         .scrollBar(BarState.Off)
         .layoutWeight(1)
       }

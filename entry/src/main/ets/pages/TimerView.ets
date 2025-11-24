@@ -114,6 +114,7 @@ export struct TimerView {
       .align(Alignment.TopStart)
       // ✅ 关键修复：手动添加顶部 Padding，避开状态栏
       .padding({ top: this.topMargin })
+      .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
       // API 17+ 使用 expandSafeArea 处理沉浸式，不再需要手动计算 padding
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
     }
