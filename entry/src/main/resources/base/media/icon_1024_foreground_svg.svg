@@ -1,8 +1,5 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1024" height="1024" fill="#F08080"/>
-
     <g transform="translate(162, 162) scale(3.5)">
-
         <circle cx="100" cy="105" r="75" fill="#FFFFFF"/>
 
         <path d="M135 75 C145 85, 155 100, 150 110" stroke="#F08080" stroke-width="4" stroke-opacity="0.6" stroke-linecap="round"/>
