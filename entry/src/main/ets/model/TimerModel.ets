@@ -4,6 +4,7 @@ import { common } from '@kit.AbilityKit';
 import { notificationManager } from '@kit.NotificationKit';
 import { vibrator } from '@kit.SensorServiceKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { NoiseService } from '../services/NoiseService';
 
 
 // 定义计时模式枚举
@@ -56,6 +57,8 @@ export class SettingsModel {
   @Trace notificationEnabled: boolean = true; // 计时结束提醒
 
   @Trace enableBreathing: boolean = true;
+  // 新增：白噪音开关
+  @Trace enableWhiteNoise: boolean = false;
 
   copyFrom(other: SettingsModel) {
     this.focusDuration = other.focusDuration;
@@ -66,6 +69,7 @@ export class SettingsModel {
     this.longBreakInterval = other.longBreakInterval;
     this.notificationEnabled = other.notificationEnabled;
     this.enableBreathing = other.enableBreathing;
+    this.enableWhiteNoise = other.enableWhiteNoise;
   }
 }
 
@@ -305,7 +309,18 @@ export class TimerStore {
 
   // 原来的计时器逻辑提取出来
   private startNormalTimer() {
+    this.stopTimer()
     this.isRunning = true;
+
+    if (this.currentMode === TimerMode.Breathing) {
+      this.currentMode = TimerMode.Focus;
+    }
+
+    // 新增：如果是专注模式且开启了白噪音，开始播放
+    if (this.currentMode === TimerMode.Focus && this.settings.enableWhiteNoise) {
+      NoiseService.start();
+    }
+
     this.timerId = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
@@ -439,6 +454,8 @@ export class TimerStore {
       clearTimeout(this.breathTimerId);
       this.breathTimerId = -1;
     }
+
+    NoiseService.stop();
   }
 
   get completedTaskCount(): number {

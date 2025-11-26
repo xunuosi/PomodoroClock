@@ -179,6 +179,18 @@
     {
       "name": "settings_enable_breathing_desc",
       "value": "4-7-8 呼吸法引导"
+    },
+    {
+      "name": "settings_flow_experience",
+      "value": "心流体验 (特色功能)"
+    },
+    {
+      "name": "settings_white_noise",
+      "value": "专注白噪音"
+    },
+    {
+      "name": "settings_white_noise_desc",
+      "value": "深海布朗噪音，隔绝干扰"
     }
   ]
 }

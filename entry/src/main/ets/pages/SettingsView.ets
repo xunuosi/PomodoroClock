@@ -216,11 +216,20 @@ export struct SettingsView {
               .padding({ top: 4, bottom: 4 })
             }
 
-            // ✅ 第二组：自动化配置
             Column() {
-              this.GroupTitle($r('app.string.settings_automation'))
+              this.GroupTitle($r('app.string.settings_flow_experience'))
 
               Column() {
+                // 1. 新增：专注白噪音
+                ToggleRow({
+                  label: $r('app.string.settings_white_noise'),
+                  isOn: this.draftSettings.enableWhiteNoise,
+                  desc: $r('app.string.settings_white_noise_desc'),
+                  onChange: (val: boolean) => { this.draftSettings.enableWhiteNoise = val; }
+                })
+
+                Divider().color($r('app.color.divider'))
+
                 // 新增开关
                 ToggleRow({
                   label: $r('app.string.settings_enable_breathing'), // 引用新添加的字符串
@@ -228,8 +237,17 @@ export struct SettingsView {
                   isOn: this.draftSettings.enableBreathing,
                   onChange: (val: boolean) => { this.draftSettings.enableBreathing = val; }
                 })
-                Divider().color($r('app.color.divider'))
+              }
+              .backgroundColor(Color.White)
+              .borderRadius(16)
+              .padding({ top: 4, bottom: 4 })
+            }
 
+            // 第二组：自动化配置
+            Column() {
+              this.GroupTitle($r('app.string.settings_automation'))
+
+              Column() {
                 ToggleRow({
                   label: $r('app.string.settings_auto_start_break'),
                   isOn: this.draftSettings.autoStartBreaks,
