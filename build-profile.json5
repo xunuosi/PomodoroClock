@@ -49,19 +49,6 @@
           "storeFile": "C:/Users/xunuosi/.ohos/config/defaultwin_PomodoroClock_VFcClwtWT9YeIfqzFPyS75chxToPDSt_D-YA5Qp_nSQ=.p12",
           "storePassword": "0000001B47A38E6DD6089CAA2EE253D6DF1AE9A851A51D0853D7D850F5D500981F183038C0D81D4D5E1998"
         }
-      },
-      {
-        "name": "release",
-        "type": "HarmonyOS",
-        "material": {
-          "storeFile": "F:/Code/HarmonyNext/PomodoroClock/self-release.p12",
-          "storePassword": "0000001C10EA701304718658C029FE59A9DE3D770C647B6349060B8DE8B1573FF5FF537FB5F4F3D3AE68FAE7",
-          "keyAlias": "self-release",
-          "keyPassword": "0000001C8C91CFA5CC0EBA6661840D8E288C8F4CF7824BEE8A001D7B3F22EBC442C383A3ECB8F323AF7F8534",
-          "signAlg": "SHA256withECDSA",
-          "profile": "F:/Code/HarmonyNext/PomodoroClock/pomodoroclockRelease.p7b",
-          "certpath": "F:/Code/HarmonyNext/PomodoroClock/relase.cer"
-        }
       }
     ]
   },
