@@ -1,11 +1,12 @@
 import { audio } from '@kit.AudioKit';
-import { BusinessError } from '@kit.BasicServicesKit';
 
 export class NoiseService {
   private static audioRenderer: audio.AudioRenderer | null = null;
   private static isPlaying: boolean = false;
-  // [修改] 将缓冲区扩大到 2 秒 (44100Hz * 2)，解决"频率过快"的循环噪音问题
-  private static readonly BUFFER_SIZE: number = 44100 * 2;
+  // [优化 1] 提升采样率到 48kHz (移动设备原生标准)，声音更细腻深沉
+  // 10秒缓冲区 = 48000 * 10
+  private static readonly SAMPLE_RATE: number = 48000;
+  private static readonly BUFFER_SIZE: number = 48000 * 10;
   private static pcmBuffer: ArrayBuffer | null = null;
 
   private static bufferOffset: number = 0;
@@ -16,7 +17,7 @@ export class NoiseService {
     if (NoiseService.audioRenderer) return;
 
     let audioStreamInfo: audio.AudioStreamInfo = {
-      samplingRate: audio.AudioSamplingRate.SAMPLE_RATE_44100,
+      samplingRate: NoiseService.SAMPLE_RATE, // 使用 48k
       channels: audio.AudioChannel.CHANNEL_1,
       sampleFormat: audio.AudioSampleFormat.SAMPLE_FORMAT_S16LE,
       encodingType: audio.AudioEncodingType.ENCODING_TYPE_RAW
@@ -43,23 +44,29 @@ export class NoiseService {
   // 生成布朗噪音算法 (随机游走)
   private static generateBrownNoiseBuffer() {
     const bufferLen = NoiseService.BUFFER_SIZE;
-    const data = new Int16Array(bufferLen);
-    let lastOut = 0.0;
+    const data: Int16Array = new Int16Array(bufferLen);
+
+    // 积分状态变量 (不要在循环中直接乘以增益！)
+    let state = 0.0;
 
     for (let i = 0; i < bufferLen; i++) {
-      // 生成 -1.0 到 1.0 的白噪音
       let white = Math.random() * 2 - 1;
 
-      // 积分处理生成布朗噪音 (低通滤波)
-      lastOut = (lastOut + (0.02 * white)) / 1.02;
+      // [修复 2] 还原标准算法系数 (0.02 / 1.02)
+      // 这是您提供的 audio.ts 中的原始参数，能产生标准的"红/棕色"噪音频谱
+      state = (state + (0.02 * white)) / 1.02;
 
-      // 增益补偿并限幅
-      lastOut *= 3.5;
-      if (lastOut > 1.0) lastOut = 1.0;
-      if (lastOut < -1.0) lastOut = -1.0;
+      // [修复 3] 增益补偿仅作用于"输出值"，不改变"状态值"
+      // 之前代码直接修改 lastOut 导致了数值爆炸和高频失真
+      let output = state * 3.5;
+
+      // [修复 4] 软限幅 (Soft Clipping)
+      // 超过 1.0 的部分平滑处理，避免刺耳的数字削波
+      if (output > 1.0) output = 1.0;
+      if (output < -1.0) output = -1.0;
 
       // 转换为 16bit PCM
-      data[i] = lastOut * 32767;
+      data[i] = output * 32767;
     }
     NoiseService.pcmBuffer = data.buffer as ArrayBuffer;
   }

@@ -29,6 +29,8 @@ class SettingsDTO {
   autoStartFocus: boolean = false;
   longBreakInterval: number = 4;
   notificationEnabled: boolean = true;
+  enableBreathing: boolean = true;
+  enableWhiteNoise: boolean = false; // 新增
 }
 
 @ObservedV2
@@ -120,10 +122,10 @@ export class TimerStore {
       // 1. 加载设置
       const settingsJson = await this.pref.get('settings', '') as string;
       if (settingsJson && settingsJson.length > 0) {
-        // ✅ 使用 try-catch 包裹解析过程，防止烂数据导致崩溃
+        // 使用 try-catch 包裹解析过程，防止烂数据导致崩溃
         try {
           const saved = JSON.parse(settingsJson) as SettingsDTO;
-          // ✅ 逐个赋值，并提供兜底默认值
+          // 逐个赋值，并提供兜底默认值
           this.settings.focusDuration = saved.focusDuration ?? 25;
           this.settings.shortBreakDuration = saved.shortBreakDuration ?? 5;
           this.settings.longBreakDuration = saved.longBreakDuration ?? 15;
@@ -131,6 +133,8 @@ export class TimerStore {
           this.settings.autoStartFocus = saved.autoStartFocus ?? false;
           this.settings.longBreakInterval = saved.longBreakInterval ?? 4;
           this.settings.notificationEnabled = saved.notificationEnabled ?? true;
+          this.settings.enableBreathing = saved.enableBreathing ?? true;
+          this.settings.enableWhiteNoise = saved.enableWhiteNoise ?? false;
         } catch (e) {
           console.error('Error parsing settings JSON:', e);
         }
@@ -172,7 +176,9 @@ export class TimerStore {
         autoStartBreaks: this.settings.autoStartBreaks,
         autoStartFocus: this.settings.autoStartFocus,
         longBreakInterval: this.settings.longBreakInterval,
-        notificationEnabled: this.settings.notificationEnabled
+        notificationEnabled: this.settings.notificationEnabled,
+        enableBreathing: this.settings.enableBreathing,
+        enableWhiteNoise: this.settings.enableWhiteNoise
       };
       const settingsJson = JSON.stringify(plainSettings);
 
