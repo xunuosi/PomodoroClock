@@ -161,7 +161,7 @@ export struct SettingsView {
         // --- 标题栏 ---
         Row() {
           Text($r('app.string.settings_title'))
-            .fontSize(18)
+            .fontSize(24)
             .fontWeight(FontWeight.Bold)
             .fontColor($r('app.color.text_primary'))
 
@@ -182,12 +182,12 @@ export struct SettingsView {
             })
         }
         .width('100%')
-        .padding({ left: 20, right: 20, top: 15, bottom: 0 })
+        .padding({ left: 24, right: 24, top: 12, bottom: 12 })
 
         // --- 内容滚动区 ---
         Scroll() {
           Column({ space: 20 }) {
-            // ✅ 第一组：计时器配置
+            // 第一组：计时器配置
             Column() {
               this.GroupTitle($r('app.string.settings_timer_config'))
 
@@ -224,6 +224,7 @@ export struct SettingsView {
                 // 新增开关
                 ToggleRow({
                   label: $r('app.string.settings_enable_breathing'), // 引用新添加的字符串
+                  desc: $r('app.string.settings_enable_breathing_desc'),
                   isOn: this.draftSettings.enableBreathing,
                   onChange: (val: boolean) => { this.draftSettings.enableBreathing = val; }
                 })
@@ -255,7 +256,7 @@ export struct SettingsView {
               .padding({ top: 4, bottom: 4 })
             }
 
-            // ✅ 第三组：通知配置
+            // 第三组：通知配置
             Column() {
               this.GroupTitle($r('app.string.settings_notification'))
 
@@ -280,7 +281,6 @@ export struct SettingsView {
 
           }
           .padding({ left: 16, right: 16 })
-          .margin({ top: -32 })
         }
         .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
         .scrollBar(BarState.Off)
@@ -290,7 +290,7 @@ export struct SettingsView {
       .height('100%')
       .backgroundColor($r('app.color.app_window_bg'))
       .padding({ top: this.topMargin })
-      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
+      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
     }
     .hideTitleBar(true)
   }

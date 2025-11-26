@@ -175,6 +175,10 @@
     {
       "name": "settings_enable_breathing",
       "value": "专注前呼吸"
+    },
+    {
+      "name": "settings_enable_breathing_desc",
+      "value": "4-7-8 呼吸法引导"
     }
   ]
 }
