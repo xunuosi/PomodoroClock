@@ -1,4 +1,4 @@
-import { TimerStore, TimerMode, TaskItem } from '../model/TimerModel';
+import { TimerStore, TimerMode, TaskItem, BreathPhase } from '../model/TimerModel';
 import { window } from '@kit.ArkUI';
 
 @Preview
@@ -7,9 +7,11 @@ export struct TimerView {
   // 接收外部传入的 VM，或者内部实例化
   @Param store: TimerStore = new TimerStore();
   @Local newTaskName: string = '';
-  // ✅ 新增：顶部避让高度状态
+  // 新增：顶部避让高度状态
   @Local topMargin: number = 0;
-
+  // 呼吸动画控制变量
+  @Local breathScale: number = 0.8;
+  @Local breathOpacity: number = 0.6;
   // 颜色常量
   private readonly ColorDark: string = '#2B333E';
   private readonly ColorLightRed: string = '#FDECEC';
@@ -84,44 +86,74 @@ export struct TimerView {
     this.store.stopTimer();
   }
 
+  // 监听呼吸阶段变化，执行动画
+  @Monitor('store.breathPhase')
+  onPhaseChange() {
+    if (this.store.currentMode !== TimerMode.Breathing) return;
+    const uiContext = this.getUIContext();
+
+    if (this.store.breathPhase === BreathPhase.Inhale) {
+      // 吸气：光晕扩散，变亮
+      uiContext.animateTo({ duration: 4000, curve: Curve.EaseInOut }, () => {
+        this.breathScale = 1.2;
+        this.breathOpacity = 0.8;
+      });
+    } else if (this.store.breathPhase === BreathPhase.Hold) {
+      // 屏息：保持并在微幅波动 (模拟静止中的张力)
+      uiContext.animateTo({ duration: 7000, curve: Curve.Linear }, () => {
+        this.breathScale = 1.25;
+      });
+    } else if (this.store.breathPhase === BreathPhase.Exhale) {
+      // 呼气：收缩，变淡
+      uiContext.animateTo({ duration: 8000, curve: Curve.EaseInOut }, () => {
+        this.breathScale = 0.8;
+        this.breathOpacity = 0.4;
+      });
+    }
+  }
+
   build() {
-    // NavDestination 是 Navigation 架构下的标准页面容器
     NavDestination() {
-      Scroll() {
-        Column() {
-          // 1. 顶部导航
-          this.HeaderBuilder()
+      // 使用 Stack 确保内容可以全屏覆盖
+      Stack({ alignContent: Alignment.TopStart }) {
 
-          // 2. 模式切换
-          this.ModeSwitcherBuilder()
-
-          // 3. 倒计时圆环
-          this.TimerCircleBuilder()
-
-          // 4. 控制按钮
-          this.ControlsBuilder()
-
-          // 5. 任务列表
-          this.TasksSectionBuilder()
+        // --- 1. 常规界面 (放在底层) ---
+        // 只有在非呼吸模式下才渲染/显示常规内容，或者用 visibility 控制
+        // 这里为了简单，我们用条件渲染。当 breathing 时，完全替换整个界面
+        if (this.store.currentMode !== TimerMode.Breathing) {
+          Scroll() {
+            Column() {
+              this.HeaderBuilder() // 标题栏
+              this.ModeSwitcherBuilder()
+              this.TimerCircleBuilder()
+              this.ControlsBuilder()
+              this.TasksSectionBuilder()
+            }
+            .width('100%')
+            .padding({ top: this.topMargin, bottom: 50 })
+          }
+          .width('100%')
+          .height('100%')
+          .scrollBar(BarState.Auto)
+          // ...
         }
-        .width('100%')
-        .backgroundColor($r('app.color.app_window_bg'))
-        .padding({ top: 13, bottom: 50 }) // 底部留白，防止划到底太贴边
+
+        // --- 2. 全屏呼吸引导 (独占显示) ---
+        if (this.store.currentMode === TimerMode.Breathing) {
+          this.BreathingSectionBuilder()
+        }
       }
       .width('100%')
       .height('100%')
-      .scrollBar(BarState.Auto) // 自动显示滚动条
-      .align(Alignment.TopStart)
-      // ✅ 关键修复：手动添加顶部 Padding，避开状态栏
-      .padding({ top: this.topMargin })
-      .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
-      // API 17+ 使用 expandSafeArea 处理沉浸式，不再需要手动计算 padding
-      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
+      .backgroundColor(this.store.currentMode === TimerMode.Breathing ? $r('app.color.white') : $r('app.color.app_window_bg'))
+      // 呼吸模式使用纯白背景更干净
+      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
     }
-    .hideTitleBar(true) // 隐藏系统默认标题栏，使用自定义 Header
+    .hideTitleBar(true)
   }
 
-  @Builder HeaderBuilder() {
+  @Builder
+  HeaderBuilder() {
     Row() {
       Row({ space: 8 }) {
         Image($r('app.media.tomatodo_logo'))
@@ -132,6 +164,7 @@ export struct TimerView {
           .fontWeight(FontWeight.Bold)
           .fontColor(this.ColorDark)
       }
+
       Blank()
       SymbolGlyph($r('sys.symbol.gearshape'))
         .fontSize(24)
@@ -148,10 +181,16 @@ export struct TimerView {
         })
     }
     .width('100%')
-    .padding({ left: 20, right: 20, top: 0, bottom: 10 })
+    .padding({
+      left: 20,
+      right: 20,
+      top: 0,
+      bottom: 10
+    })
   }
 
-  @Builder ModeSwitcherBuilder() {
+  @Builder
+  ModeSwitcherBuilder() {
     Row() {
       this.ModeButton($r('app.string.app_focus'), TimerMode.Focus)
       this.ModeButton($r('app.string.app_short_rest'), TimerMode.Short)
@@ -166,7 +205,8 @@ export struct TimerView {
     .padding(4)
   }
 
-  @Builder ModeButton(text: ResourceStr, mode: TimerMode) {
+  @Builder
+  ModeButton(text: ResourceStr, mode: TimerMode) {
     Button(text)
       .type(ButtonType.Capsule)
       // 直接读取 store 中的状态
@@ -181,7 +221,8 @@ export struct TimerView {
       })
   }
 
-  @Builder TimerCircleBuilder() {
+  @Builder
+  TimerCircleBuilder() {
     Stack({ alignContent: Alignment.Center }) {
       Column()
         .width(280)
@@ -222,7 +263,8 @@ export struct TimerView {
     .margin({ top: 20, bottom: 40 })
   }
 
-  @Builder ControlsBuilder() {
+  @Builder
+  ControlsBuilder() {
     Row({ space: 20 }) {
       Button({ type: ButtonType.Circle }) {
         SymbolGlyph($r('sys.symbol.arrow_counterclockwise'))
@@ -256,7 +298,8 @@ export struct TimerView {
     .margin({ bottom: 40 })
   }
 
-  @Builder TasksSectionBuilder() {
+  @Builder
+  TasksSectionBuilder() {
     Column() {
       Row() {
         Text($r('app.string.tasks_hint'))
@@ -269,7 +312,12 @@ export struct TimerView {
           .fontSize(12)
           .fontColor('#989A9C')
           .backgroundColor('#F0F0F0')
-          .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+          .padding({
+            left: 8,
+            right: 8,
+            top: 4,
+            bottom: 4
+          })
           .borderRadius(10)
       }
       .width('100%')
@@ -392,5 +440,78 @@ export struct TimerView {
     .borderRadius(24)
     .padding(24)
     .shadow({ radius: 20, color: 'rgba(0,0,0,0.05)', offsetY: 10 })
+  }
+
+  @Builder BreathingSectionBuilder() {
+    Stack({ alignContent: Alignment.Center }) {
+
+      // --- 层级 1: 呼吸光晕 (背景) ---
+      // 使用一个巨大的圆形，配合径向渐变和高斯模糊
+      Circle()
+        .width(300) // 基础大小
+        .height(300)
+        .fill(Color.Transparent) // 填充透明，仅靠渐变
+        .radialGradient({
+          center: ['50%', '50%'],
+          radius: 150,
+          colors: [
+            // [替换] 中心薄荷绿
+            [$r('app.color.breath_halo_center'), 0.0],
+            // [替换] 边缘透明
+            [$r('app.color.breath_halo_edge'), 1.0]
+          ]
+        })
+        .blur(60) // 关键：强力高斯模糊，制造弥散光感
+        .scale({ x: this.breathScale * 2.5, y: this.breathScale * 2.5 }) // 放大铺满屏幕中心
+        .opacity(this.breathOpacity)
+        .animation({ duration: 1000 }) // 属性变化时的平滑过渡
+
+      // --- 层级 2: 文字与读秒 (前景) ---
+      Column({ space: 16 }) {
+        // 1. 状态标题 (如：屏息)
+        Text(this.store.breathText)
+          .fontSize(32)
+          .fontWeight(FontWeight.Bold)
+          .fontColor($r('app.color.breath_text_title'))
+          .opacity(0.9)
+
+        // 2. 指导语 (如：感受当下的静止)
+        Text(this.store.breathGuideText)
+          .fontSize(16)
+          .fontWeight(FontWeight.Normal)
+          .fontColor($r('app.color.breath_text_guide'))
+          .letterSpacing(2) // 增加字间距，显得更空灵
+
+        // 3. 超大倒计时 (如：7)
+        Text(`${this.store.breathSeconds}`)
+          .fontSize(100) // 超大字号
+          .fontWeight(FontWeight.Lighter) // 极细字体
+          .fontColor($r('app.color.breath_text_counter'))
+          .margin({ top: 20 })
+          // 数字跳动动画（可选，让数字变化不那么生硬）
+          .animation({ duration: 200 })
+      }
+      .alignItems(HorizontalAlign.Center)
+
+      // --- 层级 3: 底部跳过按钮 ---
+      Column() {
+        Blank() // 占位，推到底部
+        Button($r('app.string.btn_skip'))
+          .type(ButtonType.Normal) // 纯文字按钮风格
+          .backgroundColor(Color.Transparent)
+          .fontColor($r('app.color.breath_btn_skip'))
+          .fontSize(14)
+          .margin({ bottom: 80 }) // 避开底部手势区
+          .onClick(() => {
+            this.store.skipBreathing();
+          })
+      }
+      .height('100%')
+      .width('100%')
+    }
+    .width('100%')
+    .height('100%')
+    // 沉浸式：这一层要覆盖到状态栏区域
+    .margin({ top: 0 })
   }
 }

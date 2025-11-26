@@ -10,7 +10,8 @@ import { BusinessError } from '@kit.BasicServicesKit';
 export enum TimerMode {
   Focus = 'Focus',
   Short = 'Short_rest',
-  Long = 'Long_rest'
+  Long = 'Long_rest',
+  Breathing = 'Breathing'
 }
 
 class TaskDTO {
@@ -54,6 +55,8 @@ export class SettingsModel {
 
   @Trace notificationEnabled: boolean = true; // 计时结束提醒
 
+  @Trace enableBreathing: boolean = true;
+
   copyFrom(other: SettingsModel) {
     this.focusDuration = other.focusDuration;
     this.shortBreakDuration = other.shortBreakDuration;
@@ -62,7 +65,16 @@ export class SettingsModel {
     this.autoStartFocus = other.autoStartFocus;
     this.longBreakInterval = other.longBreakInterval;
     this.notificationEnabled = other.notificationEnabled;
+    this.enableBreathing = other.enableBreathing;
   }
+}
+
+// 定义呼吸阶段
+export enum BreathPhase {
+  Ready = 'Ready',
+  Inhale = 'Inhale',
+  Hold = 'Hold',
+  Exhale = 'Exhale'
 }
 
 // 使用 V2 装饰器修饰类，实现深度观测
@@ -72,13 +84,23 @@ export class TimerStore {
   @Trace timeLeft: number = 25 * 60;
   @Trace totalTime: number = 25 * 60;
   @Trace isRunning: boolean = false;
-  // ✅ [修改] 将 string[] 改为 TaskItem[]
+  // [修改] 将 string[] 改为 TaskItem[]
   @Trace taskList: TaskItem[] = [];
 
   @Trace settings: SettingsModel = new SettingsModel();
-  @Trace completedPomodoros: number = 0; // 当前循环已完成的专注次数
+  // 当前循环已完成的专注次数
+  @Trace completedPomodoros: number = 0;
+
+  // 新增：呼吸相关状态
+  @Trace breathPhase: BreathPhase = BreathPhase.Ready;
+  @Trace breathText: ResourceStr = $r('app.string.breath_text_inhale');
+  // 新增：倒计时读秒
+  @Trace breathSeconds: number = 0;
+  // 新增：引导副标题
+  @Trace breathGuideText: ResourceStr = '';
 
   private timerId: number = -1;
+  private breathTimerId: number = -1;
   private pref: preferences.Preferences | null = null;
   private uiContext: UIContext | null = null;
 
@@ -192,16 +214,113 @@ export class TimerStore {
       this.stopTimer();
       this.isRunning = false;
     } else {
-      this.isRunning = true;
-      this.timerId = setInterval(() => {
-        if (this.timeLeft > 0) {
-          this.timeLeft--;
-        } else {
-          // 🛑 倒计时结束逻辑
-          this.handleTimerComplete();
-        }
-      }, 1000);
+      if (this.currentMode === TimerMode.Focus &&
+      this.settings.enableBreathing &&
+        this.timeLeft === this.settings.focusDuration * 60) { // 只有在初始状态才触发
+
+        this.startBreathing();
+      } else {
+        // 正常开始计时
+        this.startNormalTimer();
+      }
     }
+  }
+
+  // 核心修改：基于 Promise 链的精细倒计时逻辑
+  private async runBreathPhase(phase: BreathPhase, duration: number, text: ResourceStr, guide: ResourceStr) {
+    if (!this.isRunning) return;
+
+    this.breathPhase = phase;
+    this.breathText = text;
+    this.breathGuideText = guide;
+    this.breathSeconds = duration; // 设置初始秒数
+
+    // 每一秒 tick 一次
+    for (let i = duration; i > 0; i--) {
+      if (!this.isRunning) return; // 随时响应中断
+      this.breathSeconds = i;
+      await this.delay(1000);
+    }
+  }
+
+  // 修改：启动呼吸引导
+  private startBreathing() {
+    this.currentMode = TimerMode.Breathing;
+    this.isRunning = true;
+    this.breathPhase = BreathPhase.Ready;
+
+    let cycles = 3;
+
+    const runCycle = async () => {
+      // 循环结束或手动停止
+      if (cycles <= 0 || !this.isRunning) {
+        if (this.isRunning) this.finishBreathing();
+        return;
+      }
+
+      // 1. 吸气 (4s)
+      await this.runBreathPhase(
+        BreathPhase.Inhale,
+        4,
+        $r('app.string.breath_text_inhale'),
+        $r('app.string.breath_guide_inhale')
+      );
+
+      // 2. 屏息 (7s)
+      await this.runBreathPhase(
+        BreathPhase.Hold,
+        7,
+        $r('app.string.breath_text_hold'),
+        $r('app.string.breath_guide_hold')
+      );
+
+      // 3. 呼气 (8s)
+      await this.runBreathPhase(
+        BreathPhase.Exhale,
+        8,
+        $r('app.string.breath_text_exhale'),
+        $r('app.string.breath_guide_exhale')
+      );
+
+      cycles--;
+      runCycle(); // 递归调用下一轮
+    };
+
+    runCycle();
+  }
+
+  // 新增：跳过或完成呼吸
+  finishBreathing() {
+    this.currentMode = TimerMode.Focus; // 切回专注模式
+    this.breathPhase = BreathPhase.Ready;
+    this.startNormalTimer(); // 自动开始专注计时
+  }
+
+  // 新增：跳过按钮调用
+  skipBreathing() {
+    this.currentMode = TimerMode.Focus;
+    this.breathPhase = BreathPhase.Ready;
+    this.startNormalTimer()
+  }
+
+  // 原来的计时器逻辑提取出来
+  private startNormalTimer() {
+    this.isRunning = true;
+    this.timerId = setInterval(() => {
+      if (this.timeLeft > 0) {
+        this.timeLeft--;
+      } else {
+        this.handleTimerComplete();
+      }
+    }, 1000);
+  }
+
+  // 辅助延时函数
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => {
+      // 记录 timeout ID 以便 stopTimer 能取消它
+      this.breathTimerId = setTimeout(resolve, ms);
+    });
   }
 
   private handleTimerComplete() {
@@ -314,6 +433,11 @@ export class TimerStore {
     if (this.timerId !== -1) {
       clearInterval(this.timerId);
       this.timerId = -1;
+    }
+
+    if (this.breathTimerId !== -1) {
+      clearTimeout(this.breathTimerId);
+      this.breathTimerId = -1;
     }
   }
 

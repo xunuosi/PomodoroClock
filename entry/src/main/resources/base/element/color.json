@@ -87,6 +87,38 @@
     {
       "name": "setting_btn_bg",
       "value": "#F0F2F5"
+    },
+    {
+      "name": "breath_bg",
+      "value": "#E0F7FA"
+    },
+    {
+      "name": "breath_circle",
+      "value": "#4DD0E1"
+    },
+    {
+      "name": "breath_halo_center",
+      "value": "#69F0AE"
+    },
+    {
+      "name": "breath_halo_edge",
+      "value": "#00FFFFFF"
+    },
+    {
+      "name": "breath_text_title",
+      "value": "#37474F"
+    },
+    {
+      "name": "breath_text_guide",
+      "value": "#90A4AE"
+    },
+    {
+      "name": "breath_text_counter",
+      "value": "#263238"
+    },
+    {
+      "name": "breath_btn_skip",
+      "value": "#B0BEC5"
     }
   ]
 }

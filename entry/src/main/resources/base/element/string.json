@@ -143,6 +143,38 @@
     {
       "name": "permission_vibrate",
       "value": "用于消息提醒"
+    },
+    {
+      "name": "btn_skip",
+      "value": "跳过"
+    },
+    {
+      "name": "breath_text_inhale",
+      "value": "吸气"
+    },
+    {
+      "name": "breath_text_hold",
+      "value": "屏息"
+    },
+    {
+      "name": "breath_text_exhale",
+      "value": "呼气"
+    },
+    {
+      "name": "breath_guide_inhale",
+      "value": "平静你的思绪..."
+    },
+    {
+      "name": "breath_guide_hold",
+      "value": "感受当下的静止"
+    },
+    {
+      "name": "breath_guide_exhale",
+      "value": "释放所有的压力"
+    },
+    {
+      "name": "settings_enable_breathing",
+      "value": "专注前呼吸"
     }
   ]
 }

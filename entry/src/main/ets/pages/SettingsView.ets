@@ -221,18 +221,28 @@ export struct SettingsView {
               this.GroupTitle($r('app.string.settings_automation'))
 
               Column() {
+                // 新增开关
+                ToggleRow({
+                  label: $r('app.string.settings_enable_breathing'), // 引用新添加的字符串
+                  isOn: this.draftSettings.enableBreathing,
+                  onChange: (val: boolean) => { this.draftSettings.enableBreathing = val; }
+                })
+                Divider().color($r('app.color.divider'))
+
                 ToggleRow({
                   label: $r('app.string.settings_auto_start_break'),
                   isOn: this.draftSettings.autoStartBreaks,
                   onChange: (val: boolean) => { this.draftSettings.autoStartBreaks = val; }
                 })
                 Divider().color($r('app.color.divider'))
+
                 ToggleRow({
                   label: $r('app.string.settings_auto_start_focus'),
                   isOn: this.draftSettings.autoStartFocus,
                   onChange: (val: boolean) => { this.draftSettings.autoStartFocus = val; }
                 })
                 Divider().color($r('app.color.divider'))
+
                 CounterRow({
                   label: $r('app.string.settings_long_break_interval'),
                   value: this.draftSettings.longBreakInterval,
