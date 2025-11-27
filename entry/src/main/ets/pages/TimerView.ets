@@ -135,7 +135,7 @@ export struct TimerView {
           .width('100%')
           .height('100%')
           .scrollBar(BarState.Auto)
-          // ...
+          .edgeEffect(EdgeEffect.Spring)
         }
 
         // --- 2. 全屏呼吸引导 (独占显示) ---
